@@ -63,7 +63,7 @@ console.log(data);
 
 ### 3. Process the Document
 
-After uploading, process the document using the appropriate endpoint:
+After uploading, process the document using the appropriate endpoint and the document ID from the upload response:
 
 <CodeGroup>
 
@@ -72,7 +72,7 @@ curl -X POST "https://api.invaro.ai/api/v1/parse/statements" \
   -H "Authorization: Bearer your_api_key" \
   -H "Content-Type: application/json" \
   -d '{
-    "file_ids": ["your_file_id"]
+    "document_id": "doc_abc123"
   }'
 ```
 
@@ -85,7 +85,7 @@ headers = {
     "Content-Type": "application/json"
 }
 data = {
-    "file_ids": ["your_file_id"]
+    "document_id": "doc_abc123"
 }
 
 response = requests.post(url, headers=headers, json=data)
@@ -100,7 +100,7 @@ const response = await fetch('https://api.invaro.ai/api/v1/parse/statements', {
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    file_ids: ['your_file_id']
+    document_id: 'doc_abc123'
   })
 });
 

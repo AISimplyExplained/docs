@@ -15,7 +15,7 @@ curl -X POST "https://api.invaro.ai/api/v1/parse/invoices" \
   -H "Authorization: Bearer your_api_key" \
   -H "Content-Type: application/json" \
   -d '{
-    "file_ids": ["1234567890_invoice.pdf"],
+    "document_id": "doc_abc123",
     "options": {
       "extract_line_items": true,
       "extract_tables": true
@@ -32,7 +32,7 @@ headers = {
     "Content-Type": "application/json"
 }
 data = {
-    "file_ids": ["1234567890_invoice.pdf"],
+    "document_id": "doc_abc123",
     "options": {
         "extract_line_items": True,
         "extract_tables": True
@@ -51,7 +51,7 @@ const response = await fetch('https://api.invaro.ai/api/v1/parse/invoices', {
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    file_ids: ['1234567890_invoice.pdf'],
+    document_id: 'doc_abc123',
     options: {
       extract_line_items: true,
       extract_tables: true
@@ -67,8 +67,8 @@ console.log(data);
 
 ## Request Parameters
 
-<ParamField body="file_ids" type="array" required>
-  Array of file IDs obtained from the upload endpoint
+<ParamField body="document_id" type="string" required>
+  Document ID obtained from the upload endpoint
 </ParamField>
 
 <ParamField body="options" type="object">
@@ -104,8 +104,8 @@ console.log(data);
 {
   "success": false,
   "error": {
-    "code": "INVALID_FILE_ID",
-    "message": "One or more file IDs are invalid or expired"
+    "code": "INVALID_DOCUMENT_ID",
+    "message": "The provided document ID is invalid or expired"
   }
 }
 ```

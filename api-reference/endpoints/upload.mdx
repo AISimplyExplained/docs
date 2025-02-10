@@ -4,7 +4,7 @@ openapi: 'POST /parse/upload'
 description: 'Upload documents for processing'
 ---
 
-The file upload endpoint is the first step in processing documents. It accepts multiple files and returns file IDs that you can use for processing.
+The file upload endpoint is the first step in processing documents. It accepts multiple files and returns document IDs that you can use for processing.
 
 ## File Requirements
 
@@ -117,6 +117,7 @@ console.log(data);
     "files": [
       {
         "file_id": "1234567890_statement.pdf",
+        "document_id": "doc_abc123",
         "file_url": "https://storage.invaro.ai/files/1234567890_statement.pdf",
         "error": null
       }
@@ -125,6 +126,10 @@ console.log(data);
   }
 }
 ```
+
+<Note>
+  The `document_id` in the response is what you'll use for processing the document. This ID is required for all subsequent API calls related to the document.
+</Note>
 
 ### Validation Error
 
@@ -141,7 +146,7 @@ console.log(data);
 
 ## Next Steps
 
-After successfully uploading your documents, you can:
+After successfully uploading your documents, use the returned `document_id` to:
 - [Process Bank Statements](/api-reference/endpoints/process-statements)
 - [Process Invoices](/api-reference/endpoints/process-invoices)
 - Learn about [Best Practices](/api-reference/best-practices/file-uploads) 
