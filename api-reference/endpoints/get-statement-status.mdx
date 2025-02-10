@@ -1,0 +1,134 @@
+---
+title: 'Get Statement Processing Status'
+openapi: 'GET /parse/statements/{job_id}'
+description: 'Check the status of bank statement processing jobs'
+---
+
+This endpoint allows you to check the status of bank statement processing jobs and retrieve the extracted data once processing is complete.
+
+## Usage Examples
+
+<CodeGroup>
+
+```bash cURL
+curl "https://api.invaro.ai/api/v1/parse/statements/job_123abc" \
+  -H "Authorization: Bearer your_api_key"
+```
+
+```python Python
+import requests
+
+url = "https://api.invaro.ai/api/v1/parse/statements/job_123abc"
+headers = {
+    "Authorization": "Bearer your_api_key"
+}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.invaro.ai/api/v1/parse/statements/job_123abc', {
+  headers: {
+    'Authorization': 'Bearer your_api_key'
+  }
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+</CodeGroup>
+
+## Path Parameters
+
+<ParamField path="job_id" type="string" required>
+  The job ID returned from the process statements endpoint
+</ParamField>
+
+## Response Examples
+
+### Processing Status
+
+```json
+{
+  "success": true,
+  "data": {
+    "job_id": "job_123abc",
+    "status": "processing",
+    "progress": 45,
+    "estimated_completion": "2024-01-07T10:05:00Z"
+  }
+}
+```
+
+### Completed Status with Data
+
+```json
+{
+  "success": true,
+  "data": {
+    "job_id": "job_123abc",
+    "status": "completed",
+    "result": {
+      "account_info": {
+        "bank_name": "Chase",
+        "account_number": "****1234",
+        "account_type": "Checking",
+        "statement_period": {
+          "start_date": "2024-01-01",
+          "end_date": "2024-01-31"
+        }
+      },
+      "summary": {
+        "opening_balance": 5000.00,
+        "closing_balance": 5500.00,
+        "total_deposits": 2000.00,
+        "total_withdrawals": 1500.00
+      },
+      "transactions": [
+        {
+          "date": "2024-01-05",
+          "description": "DIRECT DEPOSIT COMPANY XYZ",
+          "amount": 1000.00,
+          "type": "credit",
+          "balance": 6000.00
+        }
+      ]
+    }
+  }
+}
+```
+
+### Error Status
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "PROCESSING_FAILED",
+    "message": "Failed to process statement due to poor image quality"
+  }
+}
+```
+
+## Status Codes
+
+The `status` field in the response can be one of:
+- `processing`: Job is currently being processed
+- `completed`: Processing finished successfully
+- `failed`: Processing encountered an error
+- `cancelled`: Job was cancelled by the user
+
+## Best Practices
+
+1. **Polling Frequency**: Poll for status no more than once every 30 seconds
+2. **Timeout Handling**: Implement exponential backoff for long-running jobs
+3. **Error Recovery**: If processing fails, check error details and resubmit if necessary
+
+## Next Steps
+
+After receiving completed results:
+1. Store the extracted data securely
+2. Implement [error handling](/api-reference/best-practices/error-handling) for failed jobs
+3. Set up [monitoring](/api-reference/best-practices/monitoring) for job completion rates 

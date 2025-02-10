@@ -1,0 +1,140 @@
+---
+title: 'Process Invoices'
+openapi: 'POST /parse/invoices'
+description: 'Process uploaded invoices'
+---
+
+The invoice processing endpoint allows you to extract data from uploaded invoices. This is an asynchronous operation that returns a job ID for tracking the processing status.
+
+## Usage Examples
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.invaro.ai/api/v1/parse/invoices" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_ids": ["1234567890_invoice.pdf"],
+    "options": {
+      "extract_line_items": true,
+      "extract_tables": true
+    }
+  }'
+```
+
+```python Python
+import requests
+
+url = "https://api.invaro.ai/api/v1/parse/invoices"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+data = {
+    "file_ids": ["1234567890_invoice.pdf"],
+    "options": {
+        "extract_line_items": True,
+        "extract_tables": True
+    }
+}
+
+response = requests.post(url, headers=headers, json=data)
+print(response.json())
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.invaro.ai/api/v1/parse/invoices', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer your_api_key',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    file_ids: ['1234567890_invoice.pdf'],
+    options: {
+      extract_line_items: true,
+      extract_tables: true
+    }
+  })
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+</CodeGroup>
+
+## Request Parameters
+
+<ParamField body="file_ids" type="array" required>
+  Array of file IDs obtained from the upload endpoint
+</ParamField>
+
+<ParamField body="options" type="object">
+  Processing options for invoice extraction
+  <Expandable title="properties">
+    <ParamField body="extract_line_items" type="boolean" default="true">
+      Extract individual line items from the invoice
+    </ParamField>
+    <ParamField body="extract_tables" type="boolean" default="true">
+      Extract tabular data from the invoice
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Response Examples
+
+### Success Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "job_id": "job_456def",
+    "status": "processing",
+    "estimated_completion": "2024-01-07T10:05:00Z"
+  }
+}
+```
+
+### Error Response
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "INVALID_FILE_ID",
+    "message": "One or more file IDs are invalid or expired"
+  }
+}
+```
+
+## Supported Invoice Types
+
+<Card>
+Our system supports various invoice formats including:
+- Standard business invoices
+- Purchase orders
+- Receipts
+- Bills of materials
+- And more...
+</Card>
+
+## Processing Details
+
+The processing pipeline includes:
+1. Document validation and preparation
+2. OCR text extraction
+3. Invoice layout analysis
+4. Data field extraction
+5. Line item parsing
+6. Table structure recognition
+7. Validation and quality checks
+
+## Next Steps
+
+After starting the processing job:
+1. [Check Job Status](/api-reference/endpoints/get-invoice-status) to monitor progress
+2. Review [Best Practices](/api-reference/best-practices/error-handling) for handling errors
+3. Set up [Rate Limit](/api-reference/rate-limits) monitoring 

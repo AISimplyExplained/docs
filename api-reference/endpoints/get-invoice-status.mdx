@@ -1,0 +1,143 @@
+---
+title: 'Get Invoice Processing Status'
+openapi: 'GET /parse/invoices/{job_id}'
+description: 'Check the status of invoice processing jobs'
+---
+
+This endpoint allows you to check the status of invoice processing jobs and retrieve the extracted data once processing is complete.
+
+## Usage Examples
+
+<CodeGroup>
+
+```bash cURL
+curl "https://api.invaro.ai/api/v1/parse/invoices/job_456def" \
+  -H "Authorization: Bearer your_api_key"
+```
+
+```python Python
+import requests
+
+url = "https://api.invaro.ai/api/v1/parse/invoices/job_456def"
+headers = {
+    "Authorization": "Bearer your_api_key"
+}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.invaro.ai/api/v1/parse/invoices/job_456def', {
+  headers: {
+    'Authorization': 'Bearer your_api_key'
+  }
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+</CodeGroup>
+
+## Path Parameters
+
+<ParamField path="job_id" type="string" required>
+  The job ID returned from the process invoices endpoint
+</ParamField>
+
+## Response Examples
+
+### Processing Status
+
+```json
+{
+  "success": true,
+  "data": {
+    "job_id": "job_456def",
+    "status": "processing",
+    "progress": 60,
+    "estimated_completion": "2024-01-07T10:05:00Z"
+  }
+}
+```
+
+### Completed Status with Data
+
+```json
+{
+  "success": true,
+  "data": {
+    "job_id": "job_456def",
+    "status": "completed",
+    "result": {
+      "invoice_info": {
+        "invoice_number": "INV-2024-001",
+        "date": "2024-01-05",
+        "due_date": "2024-02-04",
+        "currency": "USD"
+      },
+      "vendor": {
+        "name": "ABC Corporation",
+        "address": "123 Business St, Suite 100",
+        "tax_id": "12-3456789"
+      },
+      "customer": {
+        "name": "XYZ Industries",
+        "address": "456 Commerce Ave",
+        "customer_id": "CUST001"
+      },
+      "amounts": {
+        "subtotal": 1000.00,
+        "tax": 80.00,
+        "total": 1080.00
+      },
+      "line_items": [
+        {
+          "description": "Professional Services",
+          "quantity": 10,
+          "unit_price": 100.00,
+          "amount": 1000.00
+        }
+      ],
+      "payment_info": {
+        "terms": "Net 30",
+        "method": "Bank Transfer"
+      }
+    }
+  }
+}
+```
+
+### Error Status
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "PROCESSING_FAILED",
+    "message": "Failed to process invoice due to missing required fields"
+  }
+}
+```
+
+## Status Codes
+
+The `status` field in the response can be one of:
+- `processing`: Job is currently being processed
+- `completed`: Processing finished successfully
+- `failed`: Processing encountered an error
+- `cancelled`: Job was cancelled by the user
+
+## Best Practices
+
+1. **Polling Frequency**: Poll for status no more than once every 30 seconds
+2. **Timeout Handling**: Implement exponential backoff for long-running jobs
+3. **Error Recovery**: If processing fails, check error details and resubmit if necessary
+
+## Next Steps
+
+After receiving completed results:
+1. Store the extracted data securely
+2. Implement [error handling](/api-reference/best-practices/error-handling) for failed jobs
+3. Set up [monitoring](/api-reference/best-practices/monitoring) for job completion rates 

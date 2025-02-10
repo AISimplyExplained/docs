@@ -1,0 +1,251 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Invaro Document Processing API",
+        "description": "API for processing bank statements and invoices using OCR and AI",
+        "version": "1.0.0",
+        "contact": {
+            "name": "Invaro Support",
+            "email": "support@invaro.ai",
+            "url": "https://docs.invaro.ai"
+        }
+    },
+    "servers": [
+        {
+            "url": "https://api.invaro.ai/api/v1",
+            "description": "Production API"
+        },
+        {
+            "url": "https://sandbox.api.invaro.ai/v1",
+            "description": "Sandbox API"
+        }
+    ],
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
+    "paths": {
+        "/parse/upload": {
+            "post": {
+                "summary": "Upload Documents",
+                "description": "Upload one or more documents for processing",
+                "operationId": "uploadDocuments",
+                "tags": [
+                    "File Upload"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "files": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        },
+                                        "description": "Documents to upload (PDF, JPG, JPEG, PNG)"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Files uploaded successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "files": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "file_id": {
+                                                                "type": "string",
+                                                                "example": "1234567890_statement.pdf"
+                                                            },
+                                                            "file_url": {
+                                                                "type": "string",
+                                                                "example": "https://storage.invaro.ai/files/1234567890_statement.pdf"
+                                                            },
+                                                            "error": {
+                                                                "type": "string",
+                                                                "nullable": true,
+                                                                "example": null
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "done"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/parse/statements": {
+            "post": {
+                "summary": "Process Bank Statements",
+                "description": "Start processing uploaded bank statements",
+                "operationId": "processStatements",
+                "tags": [
+                    "Statement Processing"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "file_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "description": "Array of file IDs to process"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Processing started successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "job_id": {
+                                                    "type": "string",
+                                                    "example": "job_123abc"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "processing"
+                                                },
+                                                "estimated_completion": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/parse/statements/{job_id}": {
+            "get": {
+                "summary": "Get Statement Processing Status",
+                "description": "Check the status of a bank statement processing job",
+                "operationId": "getStatementStatus",
+                "tags": [
+                    "Statement Processing"
+                ],
+                "parameters": [
+                    {
+                        "name": "job_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "ID of the processing job"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Job status retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "job_id": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "processing",
+                                                        "completed",
+                                                        "failed"
+                                                    ]
+                                                },
+                                                "progress": {
+                                                    "type": "number",
+                                                    "example": 45
+                                                },
+                                                "results": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "account_info": {
+                                                            "type": "object"
+                                                        },
+                                                        "transactions": {
+                                                            "type": "array"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    }
+}

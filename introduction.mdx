@@ -1,6 +1,6 @@
 ---
 title: Introduction
-description: "Welcome to the home of your new documentation"
+description: "Welcome to Invaro's Document Processing API"
 ---
 
 <img
@@ -14,58 +14,109 @@ description: "Welcome to the home of your new documentation"
   alt="Hero Dark"
 />
 
-## Setting up
+## Overview
 
-The first step to world-class documentation is setting up your editing environments.
+Welcome to Invaro's Document Processing API documentation. Our API provides powerful capabilities for parsing and extracting data from financial documents such as bank statements and invoices using advanced OCR and AI technologies.
+
+## Key Features
 
 <CardGroup cols={2}>
   <Card
-    title="Edit Your Docs"
-    icon="pen-to-square"
-    href="https://mintlify.com/docs/quickstart"
+    title="Bank Statement Processing"
+    icon="file-invoice-dollar"
+    href="/api-reference/statement-processing"
   >
-    Get your docs set up locally for easy development
+    Extract transaction data, account details, and balances from bank statements
   </Card>
   <Card
-    title="Preview Changes"
-    icon="image"
-    href="https://mintlify.com/docs/development"
+    title="Invoice Processing"
+    icon="file-invoice"
+    href="/api-reference/invoice-processing"
   >
-    Preview your changes before you push to make sure they're perfect
+    Parse invoices to extract vendor details, line items, and payment information
+  </Card>
+  <Card
+    title="Batch Processing"
+    icon="layer-group"
+    href="/api-reference/file-upload"
+  >
+    Process multiple documents efficiently with our batch processing capabilities
+  </Card>
+  <Card
+    title="Real-time Status"
+    icon="clock"
+    href="/api-reference/job-management"
+  >
+    Track processing status and receive results in real-time
   </Card>
 </CardGroup>
 
-## Make it yours
+## Base URL
 
-Update your docs to your brand and add valuable content for the best user conversion.
+All API requests should be made to:
+
+```bash
+https://api.invaro.ai/api/v1
+```
+
+## Authentication
+
+All API endpoints require authentication using Bearer tokens. You'll need to include your API key in the Authorization header:
+
+```bash
+Authorization: Bearer your_api_key_here
+```
+
+Get your API key from the [Invaro Dashboard](https://dashboard.invaro.ai).
+
+## Quick Example
+
+Here's a quick example of uploading and processing a bank statement:
+
+```bash
+# 1. Upload the file
+curl -X POST "https://api.invaro.ai/api/v1/parse/upload" \
+  -H "Authorization: Bearer your_api_key" \
+  -F "files=@statement.pdf"
+
+# 2. Process the statement
+curl -X POST "https://api.invaro.ai/api/v1/parse/statements" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_ids": ["1234567890_statement.pdf"]
+  }'
+```
+
+## Next Steps
 
 <CardGroup cols={2}>
   <Card
-    title="Customize Style"
-    icon="palette"
-    href="https://mintlify.com/docs/settings/global"
+    title="Get Started"
+    icon="rocket"
+    href="/quickstart"
   >
-    Customize your docs to your company's colors and brands
+    Follow our quickstart guide to begin integrating with Invaro
   </Card>
   <Card
-    title="Reference APIs"
+    title="API Reference"
     icon="code"
-    href="https://mintlify.com/docs/api-playground/openapi"
+    href="/api-reference/authentication"
   >
-    Automatically generate endpoints from an OpenAPI spec
+    Explore our comprehensive API documentation
   </Card>
   <Card
-    title="Add Components"
-    icon="screwdriver-wrench"
-    href="https://mintlify.com/docs/content/components/accordions"
+    title="Best Practices"
+    icon="book"
+    href="/api-reference/best-practices/error-handling"
   >
-    Build interactive features and designs to guide your users
+    Learn best practices for using our API effectively
   </Card>
   <Card
-    title="Get Inspiration"
-    icon="stars"
-    href="https://mintlify.com/customers"
+    title="Support"
+    icon="headset"
+    href="mailto:support@invaro.ai"
   >
-    Check out our showcase of our favorite documentation
+    Get help from our support team
   </Card>
 </CardGroup>

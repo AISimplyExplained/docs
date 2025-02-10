@@ -1,0 +1,240 @@
+---
+title: 'Error Handling'
+description: 'Learn about Invaro API error codes and handling'
+---
+
+# Error Handling
+
+The Invaro API uses conventional HTTP response codes and provides detailed error information to help you handle errors effectively.
+
+## Error Response Format
+
+All API errors follow a consistent format:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human-readable error message",
+    "details": "Additional error details (optional)"
+  }
+}
+```
+
+## HTTP Status Codes
+
+<ResponseField name="2xx" type="number">
+  Successful requests
+  <Expandable title="details">
+    - `200` OK - Request succeeded
+    - `201` Created - Resource was created successfully
+    - `202` Accepted - Request accepted for processing
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="4xx" type="number">
+  Client errors
+  <Expandable title="details">
+    - `400` Bad Request - Invalid request format
+    - `401` Unauthorized - Invalid API key
+    - `403` Forbidden - Valid API key but insufficient permissions
+    - `404` Not Found - Resource not found
+    - `409` Conflict - Resource conflict
+    - `429` Too Many Requests - Rate limit exceeded
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="5xx" type="number">
+  Server errors
+  <Expandable title="details">
+    - `500` Internal Server Error - Server error
+    - `502` Bad Gateway - Invalid response from upstream server
+    - `503` Service Unavailable - Service temporarily unavailable
+    - `504` Gateway Timeout - Request timeout
+  </Expandable>
+</ResponseField>
+
+## Common Error Codes
+
+### Authentication Errors
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Invalid API key provided"
+  }
+}
+```
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "FORBIDDEN",
+    "message": "API key does not have access to this resource"
+  }
+}
+```
+
+### Validation Errors
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid request parameters",
+    "details": {
+      "file_ids": "Must provide at least one file ID"
+    }
+  }
+}
+```
+
+### Rate Limit Errors
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "Too many requests. Please try again in 23 seconds.",
+    "retry_after": 23
+  }
+}
+```
+
+### Resource Errors
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "RESOURCE_NOT_FOUND",
+    "message": "The requested resource was not found"
+  }
+}
+```
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "RESOURCE_CONFLICT",
+    "message": "Resource already exists"
+  }
+}
+```
+
+### Processing Errors
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "PROCESSING_ERROR",
+    "message": "Failed to process document",
+    "details": "Unable to extract text from document"
+  }
+}
+```
+
+## Error Handling Best Practices
+
+### 1. Check Success Flag
+
+Always check the `success` field in the response:
+
+```javascript
+const response = await api.processDocument(fileId);
+if (!response.success) {
+  // Handle error
+  console.error(response.error.message);
+  return;
+}
+```
+
+### 2. Implement Retry Logic
+
+Implement exponential backoff for retryable errors:
+
+```javascript
+async function makeRequestWithRetry(fn, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fn();
+      return response;
+    } catch (error) {
+      if (!isRetryableError(error) || i === maxRetries - 1) {
+        throw error;
+      }
+      await sleep(Math.pow(2, i) * 1000);
+    }
+  }
+}
+
+function isRetryableError(error) {
+  return [
+    429, // Rate limit
+    502, // Bad gateway
+    503, // Service unavailable
+    504  // Gateway timeout
+  ].includes(error.status);
+}
+```
+
+### 3. Handle Rate Limits
+
+Respect rate limit headers and implement backoff:
+
+```javascript
+function handleRateLimit(error) {
+  if (error.code === 'RATE_LIMIT_EXCEEDED') {
+    const retryAfter = error.retry_after || 1;
+    return new Promise(resolve => {
+      setTimeout(resolve, retryAfter * 1000);
+    });
+  }
+  throw error;
+}
+```
+
+### 4. Log Errors
+
+Implement proper error logging:
+
+```javascript
+function logError(error) {
+  const errorInfo = {
+    code: error.code,
+    message: error.message,
+    timestamp: new Date().toISOString(),
+    requestId: error.requestId
+  };
+  console.error('API Error:', errorInfo);
+}
+```
+
+## Error Categories
+
+<Card>
+  **Retryable Errors**
+  - Rate limit exceeded (429)
+  - Gateway errors (502, 503, 504)
+  - Temporary processing failures
+
+  **Non-Retryable Errors**
+  - Authentication errors (401, 403)
+  - Validation errors (400)
+  - Not found errors (404)
+  - Permanent processing failures
+</Card>
+
+## Support
+
+If you encounter persistent errors or need assistance, contact our support:
+- Email: [support@invaro.ai](mailto:support@invaro.ai)
+- Status Page: [status.invaro.ai](https://status.invaro.ai) 

@@ -1,86 +1,186 @@
 ---
 title: 'Quickstart'
-description: 'Start building awesome documentation in under 5 minutes'
+description: 'Get started with Invaro API in minutes'
 ---
 
-## Setup your development
+## Getting Started
 
-Learn how to update your docs locally and deploy them to the public.
+Follow this guide to quickly integrate Invaro's document processing capabilities into your application.
 
-### Edit and preview
+### 1. Get Your API Key
 
-<AccordionGroup>
-  <Accordion icon="github" title="Clone your docs locally">
-    During the onboarding process, we created a repository on your Github with
-    your docs content. You can find this repository on our
-    [dashboard](https://dashboard.mintlify.com). To clone the repository
-    locally, follow these
-    [instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
-    in your terminal.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Preview changes">
-    Previewing helps you make sure your changes look as intended. We built a
-    command line interface to render these changes locally. 1. Install the
-    [Mintlify CLI](https://www.npmjs.com/package/mintlify) to preview the
-    documentation changes locally with this command: ``` npm i -g mintlify ```
-    2. Run the following command at the root of your documentation (where
-    `mint.json` is): ``` mintlify dev ```
-  </Accordion>
-</AccordionGroup>
+<Steps>
+  1. Sign up for an [Invaro account](https://dashboard.invaro.ai/signup)
+  2. Navigate to the [API Keys section](https://dashboard.invaro.ai/api-keys)
+  3. Create a new API key
+  4. Store your API key securely - you'll need it for all API requests
+</Steps>
 
-### Deploy your changes
+### 2. Make Your First API Call
 
-<AccordionGroup>
+Test your API key by uploading a sample document:
 
-<Accordion icon="message-bot" title="Install our Github app">
-  Our Github app automatically deploys your changes to your docs site, so you
-  don't need to manage deployments yourself. You can find the link to install on
-  your [dashboard](https://dashboard.mintlify.com). Once the bot has been
-  successfully installed, there should be a check mark next to the commit hash
-  of the repo.
-</Accordion>
-<Accordion icon="rocket" title="Push your changes">
-  [Commit and push your changes to
-  Git](https://docs.github.com/en/get-started/using-git/pushing-commits-to-a-remote-repository#about-git-push)
-  for your changes to update in your docs site. If you push and don't see that
-  the Github app successfully deployed your changes, you can also manually
-  update your docs through our [dashboard](https://dashboard.mintlify.com).
-</Accordion>
+<CodeGroup>
 
-</AccordionGroup>
+```bash cURL
+curl -X POST "https://api.invaro.ai/api/v1/parse/upload" \
+  -H "Authorization: Bearer your_api_key" \
+  -F "files=@sample.pdf"
+```
 
-## Update your docs
+```python Python
+import requests
 
-Add content directly in your files with MDX syntax and React components. You can use any of our components, or even build your own.
+url = "https://api.invaro.ai/api/v1/parse/upload"
+headers = {
+    "Authorization": "Bearer your_api_key"
+}
+files = {
+    "files": ("sample.pdf", open("sample.pdf", "rb"))
+}
 
-<CardGroup>
+response = requests.post(url, headers=headers, files=files)
+print(response.json())
+```
 
-<Card title="Style Your Docs" icon="paintbrush" href="/settings/global">
-  Add flair to your docs with personalized branding.
-</Card>
+```javascript JavaScript
+const form = new FormData();
+form.append('files', fileInput.files[0]);
 
-<Card
-  title="Add API Endpoints"
-  icon="square-code"
-  href="/api-playground/configuration"
->
-  Implement your OpenAPI spec and enable API user interaction.
-</Card>
+const response = await fetch('https://api.invaro.ai/api/v1/parse/upload', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer your_api_key'
+  },
+  body: form
+});
 
-<Card
-  title="Integrate Analytics"
-  icon="chart-mixed"
-  href="/analytics/supported-integrations"
->
-  Draw insights from user interactions with your documentation.
-</Card>
+const data = await response.json();
+console.log(data);
+```
 
-<Card
-  title="Host on a Custom Domain"
-  icon="browser"
-  href="/settings/custom-domain/subdomain"
->
-  Keep your docs on your own website's subdomain.
-</Card>
+</CodeGroup>
 
+### 3. Process the Document
+
+After uploading, process the document using the appropriate endpoint:
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.invaro.ai/api/v1/parse/statements" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_ids": ["your_file_id"]
+  }'
+```
+
+```python Python
+import requests
+
+url = "https://api.invaro.ai/api/v1/parse/statements"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+data = {
+    "file_ids": ["your_file_id"]
+}
+
+response = requests.post(url, headers=headers, json=data)
+print(response.json())
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.invaro.ai/api/v1/parse/statements', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer your_api_key',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    file_ids: ['your_file_id']
+  })
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+</CodeGroup>
+
+### 4. Check Processing Status
+
+Monitor the processing status using the job ID:
+
+<CodeGroup>
+
+```bash cURL
+curl "https://api.invaro.ai/api/v1/parse/statements/job_123abc" \
+  -H "Authorization: Bearer your_api_key"
+```
+
+```python Python
+import requests
+
+url = "https://api.invaro.ai/api/v1/parse/statements/job_123abc"
+headers = {
+    "Authorization": "Bearer your_api_key"
+}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.invaro.ai/api/v1/parse/statements/job_123abc', {
+  headers: {
+    'Authorization': 'Bearer your_api_key'
+  }
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+</CodeGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="API Reference"
+    icon="book-open"
+    href="/api-reference/authentication"
+  >
+    Explore our detailed API documentation
+  </Card>
+  <Card
+    title="Bank Statements"
+    icon="file-invoice-dollar"
+    href="/api-reference/statement-processing"
+  >
+    Learn about bank statement processing
+  </Card>
+  <Card
+    title="Invoices"
+    icon="file-invoice"
+    href="/api-reference/invoice-processing"
+  >
+    Discover invoice processing capabilities
+  </Card>
+  <Card
+    title="Best Practices"
+    icon="stars"
+    href="/api-reference/best-practices/error-handling"
+  >
+    Learn how to use the API effectively
+  </Card>
 </CardGroup>
+
+## Support
+
+Need help? Contact our support team:
+- Email: [support@invaro.ai](mailto:support@invaro.ai)
+- Dashboard: [https://dashboard.invaro.ai/support](https://dashboard.invaro.ai/support)

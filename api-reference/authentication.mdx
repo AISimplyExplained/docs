@@ -1,0 +1,62 @@
+---
+title: 'Authentication'
+description: 'Learn how to authenticate your API requests with Invaro'
+---
+
+# Authentication
+
+Invaro API uses Bearer token authentication for securing all API endpoints. You'll need to include your API key in the Authorization header for all requests.
+
+## API Keys
+
+Your API key serves as your account's identity and should be kept secure. You can obtain your API key from the Invaro dashboard.
+
+### Authorization Header
+
+Include your API key in the `Authorization` header using the Bearer scheme:
+
+```bash
+Authorization: Bearer your_api_key_here
+```
+
+### Example Request
+
+```bash
+curl -X POST "https://api.invaro.ai/api/v1/parse/upload" \
+  -H "Authorization: Bearer your_api_key" \
+  -F "files=@statement.pdf"
+```
+
+## Security Best Practices
+
+1. **Keep your API key secure**
+   - Never share your API key or commit it to version control
+   - Use environment variables to store your API key
+   - Rotate your API key periodically
+
+2. **Use HTTPS**
+   - Always make requests over HTTPS
+   - We reject all non-HTTPS requests
+
+3. **Key Rotation**
+   - You can generate new API keys from the dashboard
+   - Maintain a list of active keys
+   - Revoke compromised keys immediately
+
+## Rate Limiting
+
+Each API key has its own rate limit. See our [Rate Limits](/api-reference/rate-limits) page for more details.
+
+## Error Responses
+
+If authentication fails, you'll receive a `401 Unauthorized` response:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Invalid API key provided"
+  }
+}
+``` 

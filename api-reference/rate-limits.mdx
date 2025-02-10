@@ -1,0 +1,104 @@
+---
+title: 'Rate Limits'
+description: 'Understanding API rate limits and best practices'
+---
+
+# Rate Limits
+
+To ensure fair usage and system stability, Invaro API implements rate limiting on all endpoints.
+
+## Default Limits
+
+<Card>
+  - **60 requests per minute** per API key
+  - **Batch operations count as multiple requests**
+  - Rate limits are calculated on a rolling window
+</Card>
+
+## Rate Limit Headers
+
+All API responses include headers to help you track your rate limit status:
+
+<ResponseField name="X-RateLimit-Limit" type="number">
+  The maximum number of requests allowed per minute
+</ResponseField>
+
+<ResponseField name="X-RateLimit-Remaining" type="number">
+  The number of requests remaining in the current window
+</ResponseField>
+
+<ResponseField name="X-RateLimit-Reset" type="number">
+  Unix timestamp when the rate limit window resets
+</ResponseField>
+
+### Example Headers
+```http
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 45
+X-RateLimit-Reset: 1704624000
+```
+
+## Rate Limit Response
+
+When you exceed the rate limit, you'll receive a `429 Too Many Requests` response:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "Too many requests. Please try again in 23 seconds.",
+    "retry_after": 23
+  }
+}
+```
+
+## Batch Operations
+
+When using batch operations, keep in mind:
+
+1. **File Upload Endpoint**
+   - Each file in a batch upload counts as one request
+   - Uploading 10 files counts as 10 requests against your limit
+
+2. **Processing Endpoints**
+   - Each file ID in a processing request counts as one request
+   - Processing 5 files counts as 5 requests
+
+## Best Practices
+
+1. **Implement Exponential Backoff**
+   ```javascript
+   async function makeRequest(retries = 3, baseDelay = 1000) {
+     for (let i = 0; i < retries; i++) {
+       try {
+         const response = await fetch('/api/endpoint');
+         if (response.status !== 429) return response;
+         
+         const retryAfter = response.headers.get('Retry-After');
+         const delay = retryAfter ? parseInt(retryAfter) * 1000 : baseDelay * Math.pow(2, i);
+         await new Promise(resolve => setTimeout(resolve, delay));
+       } catch (error) {
+         if (i === retries - 1) throw error;
+       }
+     }
+   }
+   ```
+
+2. **Monitor Rate Limits**
+   - Track remaining requests using response headers
+   - Implement rate limit warning systems
+   - Consider using a queue for high-volume operations
+
+3. **Optimize Request Usage**
+   - Use batch operations when possible
+   - Cache responses when appropriate
+   - Implement request throttling
+
+## Enterprise Plans
+
+If you need higher rate limits, contact our [sales team](mailto:sales@invaro.ai) to discuss enterprise plans with:
+
+- Higher rate limits
+- Dedicated support
+- Custom solutions 

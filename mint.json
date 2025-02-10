@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "Starter Kit",
+  "name": "Invaro API Documentation",
   "logo": {
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
@@ -18,12 +18,12 @@
   "topbarLinks": [
     {
       "name": "Support",
-      "url": "mailto:hi@mintlify.com"
+      "url": "mailto:support@invaro.ai"
     }
   ],
   "topbarCtaButton": {
     "name": "Dashboard",
-    "url": "https://dashboard.mintlify.com"
+    "url": "https://dashboard.invaro.ai"
   },
   "tabs": [
     {
@@ -35,17 +35,12 @@
     {
       "name": "Documentation",
       "icon": "book-open-cover",
-      "url": "https://mintlify.com/docs"
+      "url": "https://docs.invaro.ai"
     },
     {
       "name": "Community",
       "icon": "slack",
-      "url": "https://mintlify.com/community"
-    },
-    {
-      "name": "Blog",
-      "icon": "newspaper",
-      "url": "https://mintlify.com/blog"
+      "url": "https://community.invaro.ai"
     }
   ],
   "navigation": [
@@ -53,39 +48,63 @@
       "group": "Get Started",
       "pages": [
         "introduction",
-        "quickstart",
-        "development"
+        "quickstart"
       ]
     },
     {
-      "group": "Essentials",
+      "group": "API Endpoints",
       "pages": [
-        "essentials/markdown",
-        "essentials/code",
-        "essentials/images",
-        "essentials/settings",
-        "essentials/navigation",
-        "essentials/reusable-snippets"
+        "api-reference/authentication",
+        "api-reference/file-upload",
+        "api-reference/statement-processing",
+        "api-reference/invoice-processing",
+        "api-reference/job-management"
       ]
     },
     {
-      "group": "API Documentation",
+      "group": "API Guidelines",
       "pages": [
-        "api-reference/introduction"
+        "api-reference/rate-limits",
+        "api-reference/errors",
+        "api-reference/best-practices/error-handling",
+        "api-reference/best-practices/file-uploads"
       ]
     },
     {
-      "group": "Endpoint Examples",
+      "group": "API Reference",
       "pages": [
-        "api-reference/endpoint/get",
-        "api-reference/endpoint/create",
-        "api-reference/endpoint/delete"
+        {
+          "group": "File Upload",
+          "pages": [
+            "api-reference/endpoints/upload"
+          ]
+        },
+        {
+          "group": "Statement Processing",
+          "pages": [
+            "api-reference/endpoints/process-statements",
+            "api-reference/endpoints/get-statement-status"
+          ]
+        },
+        {
+          "group": "Invoice Processing",
+          "pages": [
+            "api-reference/endpoints/process-invoices",
+            "api-reference/endpoints/get-invoice-status"
+          ]
+        }
       ]
     }
   ],
   "footerSocials": {
-    "x": "https://x.com/mintlify",
-    "github": "https://github.com/mintlify",
-    "linkedin": "https://linkedin.com/company/mintlify"
-  }
+    "github": "https://github.com/invaro",
+    "linkedin": "https://linkedin.com/company/invaro"
+  },
+  "api": {
+    "baseUrl": "https://api.invaro.ai/api/v1",
+    "auth": {
+      "method": "bearer"
+    }
+  },
+  "openapi": "./openapi.json"
 }

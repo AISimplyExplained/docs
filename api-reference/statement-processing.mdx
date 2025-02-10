@@ -1,0 +1,193 @@
+---
+title: 'Bank Statement Processing'
+description: 'Process and extract data from bank statements'
+---
+
+# Bank Statement Processing
+
+Extract structured data from bank statements using our advanced OCR and AI processing capabilities.
+
+## Process Statements Endpoint
+
+<ParamField path="/parse/statements" method="POST">
+  Process uploaded bank statements for data extraction
+</ParamField>
+
+### Request Format
+
+<ResponseField name="file_ids" type="array" required>
+  Array of file IDs obtained from the upload endpoint
+</ResponseField>
+
+<RequestExample>
+```bash
+curl -X POST "https://api.invaro.ai/api/v1/parse/statements" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_ids": ["1234567890_statement.pdf"]
+  }'
+```
+</RequestExample>
+
+### Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the processing request was successful
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  Contains the processing job details
+  <Expandable title="properties">
+    <ResponseField name="job_id" type="string">
+      Unique identifier for the processing job
+    </ResponseField>
+    <ResponseField name="status" type="string">
+      Current status of the job (processing/completed)
+    </ResponseField>
+    <ResponseField name="estimated_completion" type="string">
+      Estimated completion time in ISO 8601 format
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Success Response Example
+
+```json
+{
+  "success": true,
+  "data": {
+    "job_id": "job_123abc",
+    "status": "processing",
+    "estimated_completion": "2024-01-07T10:05:00Z"
+  }
+}
+```
+
+## Check Processing Status
+
+<ParamField path="/parse/statements/{job_id}" method="GET">
+  Get the status and results of a statement processing job
+</ParamField>
+
+### Response Examples
+
+#### Processing Status
+```json
+{
+  "success": true,
+  "data": {
+    "job_id": "job_123abc",
+    "status": "processing",
+    "progress": 45,
+    "estimated_completion": "2024-01-07T10:05:00Z"
+  }
+}
+```
+
+#### Completed Results
+```json
+{
+  "success": true,
+  "data": {
+    "job_id": "job_123abc",
+    "status": "completed",
+    "results": {
+      "account_info": {
+        "account_number": "1234567890",
+        "bank_name": "Example Bank",
+        "account_holder": "John Doe",
+        "account_type": "Checking",
+        "currency": "USD"
+      },
+      "statement_period": {
+        "start_date": "2024-01-01",
+        "end_date": "2024-01-31"
+      },
+      "summary": {
+        "opening_balance": 5000.00,
+        "closing_balance": 5500.50,
+        "total_credits": 2000.00,
+        "total_debits": 1499.50
+      },
+      "transactions": [
+        {
+          "date": "2024-01-01",
+          "description": "Direct Deposit - EMPLOYER NAME",
+          "amount": 2000.00,
+          "type": "credit",
+          "balance": 7000.00,
+          "category": "income",
+          "reference": "REF123456"
+        }
+      ],
+      "metadata": {
+        "page_count": 5,
+        "confidence_score": 0.95,
+        "processing_time": "2.5s"
+      }
+    }
+  }
+}
+```
+
+## Supported Banks
+
+<Card>
+Our system supports statements from major banks worldwide, including:
+- Bank of America
+- Chase
+- Wells Fargo
+- Citibank
+- HSBC
+- And many more...
+</Card>
+
+## Best Practices
+
+1. **File Preparation**
+   - Ensure statements are in PDF format
+   - Remove password protection
+   - Use high-quality scans (300 DPI minimum)
+   - Ensure all pages are properly oriented
+
+2. **Processing Strategy**
+   - Process statements in chronological order
+   - Use batch processing for multiple statements
+   - Implement webhook notifications for long-running jobs
+
+3. **Error Handling**
+   - Validate file IDs before processing
+   - Implement retry logic for failed jobs
+   - Store job IDs for future reference
+
+## Error Responses
+
+### Invalid File ID
+```json
+{
+  "success": false,
+  "error": {
+    "code": "INVALID_FILE_ID",
+    "message": "One or more file IDs are invalid or expired"
+  }
+}
+```
+
+### Processing Failed
+```json
+{
+  "success": false,
+  "error": {
+    "code": "PROCESSING_FAILED",
+    "message": "Failed to process statement",
+    "details": "Unable to detect bank template"
+  }
+}
+```
+
+## Next Steps
+
+- Set up [Webhooks](/api-reference/webhooks/overview) for processing notifications
+- Learn about [Error Handling](/api-reference/errors)
+- Explore [Best Practices](/api-reference/best-practices/error-handling) 

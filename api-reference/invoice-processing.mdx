@@ -1,0 +1,238 @@
+---
+title: 'Invoice Processing'
+description: 'Process and extract data from invoices and receipts'
+---
+
+# Invoice Processing
+
+Extract structured data from invoices and receipts using our advanced OCR and AI processing capabilities.
+
+## Process Invoices Endpoint
+
+<ParamField path="/parse/invoices" method="POST">
+  Process uploaded invoices for data extraction
+</ParamField>
+
+### Request Format
+
+<ResponseField name="file_ids" type="array" required>
+  Array of file IDs obtained from the upload endpoint
+</ResponseField>
+
+<RequestExample>
+```bash
+curl -X POST "https://api.invaro.ai/api/v1/parse/invoices" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_ids": ["1234567890_invoice.pdf"]
+  }'
+```
+</RequestExample>
+
+### Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the processing request was successful
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  Contains the processing job details
+  <Expandable title="properties">
+    <ResponseField name="job_id" type="string">
+      Unique identifier for the processing job
+    </ResponseField>
+    <ResponseField name="status" type="string">
+      Current status of the job (processing/completed)
+    </ResponseField>
+    <ResponseField name="estimated_completion" type="string">
+      Estimated completion time in ISO 8601 format
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Success Response Example
+
+```json
+{
+  "success": true,
+  "data": {
+    "job_id": "job_456def",
+    "status": "processing",
+    "estimated_completion": "2024-01-07T10:05:00Z"
+  }
+}
+```
+
+## Check Processing Status
+
+<ParamField path="/parse/invoices/{job_id}" method="GET">
+  Get the status and results of an invoice processing job
+</ParamField>
+
+### Response Examples
+
+#### Processing Status
+```json
+{
+  "success": true,
+  "data": {
+    "job_id": "job_456def",
+    "status": "processing",
+    "progress": 60,
+    "estimated_completion": "2024-01-07T10:05:00Z"
+  }
+}
+```
+
+#### Completed Results
+```json
+{
+  "success": true,
+  "data": {
+    "job_id": "job_456def",
+    "status": "completed",
+    "results": {
+      "invoice_info": {
+        "invoice_number": "INV-2024-001",
+        "invoice_date": "2024-01-01",
+        "due_date": "2024-01-31",
+        "currency": "USD",
+        "language": "en"
+      },
+      "vendor": {
+        "name": "Example Vendor Inc.",
+        "tax_id": "12-3456789",
+        "address": {
+          "street": "123 Business St",
+          "city": "New York",
+          "state": "NY",
+          "postal_code": "10001",
+          "country": "US"
+        },
+        "contact": {
+          "email": "billing@example.com",
+          "phone": "+1-555-0123"
+        }
+      },
+      "customer": {
+        "name": "Client Company LLC",
+        "tax_id": "98-7654321",
+        "address": {
+          "street": "456 Client Ave",
+          "city": "Los Angeles",
+          "state": "CA",
+          "postal_code": "90001",
+          "country": "US"
+        }
+      },
+      "items": [
+        {
+          "description": "Professional Services",
+          "quantity": 10,
+          "unit_price": 150.00,
+          "amount": 1500.00,
+          "tax_rate": 0.10,
+          "tax_amount": 150.00
+        }
+      ],
+      "summary": {
+        "subtotal": 1500.00,
+        "tax_total": 150.00,
+        "total": 1650.00
+      },
+      "payment": {
+        "terms": "Net 30",
+        "method": "Bank Transfer",
+        "bank_info": {
+          "bank_name": "Example Bank",
+          "account_number": "****5678",
+          "routing_number": "****1234"
+        }
+      },
+      "metadata": {
+        "page_count": 1,
+        "confidence_score": 0.98,
+        "processing_time": "1.8s"
+      }
+    }
+  }
+}
+```
+
+## Supported Document Types
+
+<Card>
+Our system processes various types of documents:
+- Commercial Invoices
+- Sales Receipts
+- Purchase Orders
+- Credit Notes
+- Tax Invoices
+- Digital Invoices (PDF)
+- Scanned Paper Invoices
+</Card>
+
+## Best Practices
+
+1. **Document Preparation**
+   - Use clear, high-resolution scans
+   - Ensure all text is legible
+   - Remove any highlighting or annotations
+   - Keep documents flat and properly aligned
+
+2. **Processing Strategy**
+   - Group similar invoices together
+   - Use batch processing for efficiency
+   - Implement webhook notifications
+   - Store original documents for reference
+
+3. **Data Validation**
+   - Verify extracted amounts match totals
+   - Check for required fields
+   - Validate tax calculations
+   - Compare against known vendor information
+
+## Error Responses
+
+### Invalid File ID
+```json
+{
+  "success": false,
+  "error": {
+    "code": "INVALID_FILE_ID",
+    "message": "One or more file IDs are invalid or expired"
+  }
+}
+```
+
+### Processing Failed
+```json
+{
+  "success": false,
+  "error": {
+    "code": "PROCESSING_FAILED",
+    "message": "Failed to process invoice",
+    "details": "Poor image quality or unsupported format"
+  }
+}
+```
+
+## Field Extraction Confidence
+
+Our AI model provides confidence scores for each extracted field:
+
+<ResponseField name="confidence_score" type="number">
+  A value between 0 and 1 indicating extraction confidence
+  <Expandable title="ranges">
+    - 0.9 - 1.0: High confidence
+    - 0.7 - 0.9: Medium confidence
+    - < 0.7: Low confidence (manual review recommended)
+  </Expandable>
+</ResponseField>
+
+## Next Steps
+
+- Set up [Webhooks](/api-reference/webhooks/overview) for processing notifications
+- Learn about [Error Handling](/api-reference/errors)
+- Explore [Best Practices](/api-reference/best-practices/error-handling)

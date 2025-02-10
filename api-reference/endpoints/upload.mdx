@@ -1,0 +1,147 @@
+---
+title: 'Upload Documents'
+openapi: 'POST /parse/upload'
+description: 'Upload documents for processing'
+---
+
+The file upload endpoint is the first step in processing documents. It accepts multiple files and returns file IDs that you can use for processing.
+
+## File Requirements
+
+<Card>
+  - Supported formats: PDF, JPG, JPEG, PNG
+  - Maximum file size: 10MB per file
+  - Maximum files per request: 50
+  - Minimum resolution: 300 DPI (recommended)
+</Card>
+
+## Usage Examples
+
+### Upload a Single File
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.invaro.ai/api/v1/parse/upload" \
+  -H "Authorization: Bearer your_api_key" \
+  -F "files=@statement.pdf"
+```
+
+```python Python
+import requests
+
+url = "https://api.invaro.ai/api/v1/parse/upload"
+headers = {
+    "Authorization": "Bearer your_api_key"
+}
+files = {
+    "files": ("statement.pdf", open("statement.pdf", "rb"))
+}
+
+response = requests.post(url, headers=headers, files=files)
+print(response.json())
+```
+
+```javascript JavaScript
+const form = new FormData();
+form.append('files', fileInput.files[0]);
+
+const response = await fetch('https://api.invaro.ai/api/v1/parse/upload', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer your_api_key'
+  },
+  body: form
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+</CodeGroup>
+
+### Upload Multiple Files
+
+<CodeGroup>
+
+```bash cURL
+curl -X POST "https://api.invaro.ai/api/v1/parse/upload" \
+  -H "Authorization: Bearer your_api_key" \
+  -F "files=@statement1.pdf" \
+  -F "files=@statement2.pdf"
+```
+
+```python Python
+import requests
+
+url = "https://api.invaro.ai/api/v1/parse/upload"
+headers = {
+    "Authorization": "Bearer your_api_key"
+}
+files = [
+    ("files", ("statement1.pdf", open("statement1.pdf", "rb"))),
+    ("files", ("statement2.pdf", open("statement2.pdf", "rb")))
+]
+
+response = requests.post(url, headers=headers, files=files)
+print(response.json())
+```
+
+```javascript JavaScript
+const form = new FormData();
+form.append('files', fileInput.files[0]);
+form.append('files', fileInput.files[1]);
+
+const response = await fetch('https://api.invaro.ai/api/v1/parse/upload', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer your_api_key'
+  },
+  body: form
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+</CodeGroup>
+
+## Response Examples
+
+### Successful Upload
+
+```json
+{
+  "success": true,
+  "data": {
+    "files": [
+      {
+        "file_id": "1234567890_statement.pdf",
+        "file_url": "https://storage.invaro.ai/files/1234567890_statement.pdf",
+        "error": null
+      }
+    ],
+    "status": "done"
+  }
+}
+```
+
+### Validation Error
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid file type",
+    "details": "Only PDF, JPG, JPEG, and PNG files are allowed"
+  }
+}
+```
+
+## Next Steps
+
+After successfully uploading your documents, you can:
+- [Process Bank Statements](/api-reference/endpoints/process-statements)
+- [Process Invoices](/api-reference/endpoints/process-invoices)
+- Learn about [Best Practices](/api-reference/best-practices/file-uploads) 
