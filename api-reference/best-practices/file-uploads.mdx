@@ -3,77 +3,78 @@ title: 'File Upload Best Practices'
 description: 'Learn how to optimize file uploads and handle documents effectively'
 ---
 
-{/* # File Upload Best Practices */}
+<Note>
+  Follow these guidelines to ensure optimal document processing results and efficient API usage.
+</Note>
 
-This guide covers best practices for uploading and processing documents with the Invaro API.
+## Document Requirements
 
-## File Preparation
+<CardGroup cols={2}>
+  <Card title="Supported Formats" icon="file">
+    - PDF (preferred for documents)
+    - PNG (for scanned documents)
+    - JPEG (for scanned documents)
+  </Card>
 
-### 1. Document Quality
+  <Card title="File Specifications" icon="gear">
+    - Resolution: 300 DPI minimum
+    - Max file size: 10MB per file
+    - Max batch size: 50 files
+  </Card>
+</CardGroup>
 
-<Card>
-  **Optimal Document Settings**
-  - Resolution: 300 DPI minimum
-  - Format: PDF preferred for documents
-  - Image formats: PNG or JPEG for scanned documents
-  - Maximum file size: 10MB
-  - Clear, legible text
-  - Proper orientation
-</Card>
+## Implementation Guide
 
-### 2. File Optimization
+### 1. File Optimization
 
-Optimize files before upload:
+<Tabs>
+  <Tab title="JavaScript">
+    ```javascript
+    const sharp = require('sharp');
 
-<CodeGroup>
+    async function optimizeImage(inputBuffer) {
+      return await sharp(inputBuffer)
+        .resize(2000, 2000, {
+          fit: 'inside',
+          withoutEnlargement: true
+        })
+        .jpeg({
+          quality: 85,
+          progressive: true
+        })
+        .toBuffer();
+    }
+    ```
+  </Tab>
+  <Tab title="Python">
+    ```python
+    from PIL import Image
+    import io
 
-```javascript JavaScript
-const sharp = require('sharp');
+    def optimize_image(input_bytes):
+        with Image.open(io.BytesIO(input_bytes)) as img:
+            # Convert to RGB if needed
+            if img.mode in ('RGBA', 'P'):
+                img = img.convert('RGB')
+            
+            # Resize if too large
+            max_size = 2000
+            ratio = min(max_size/img.width, max_size/img.height)
+            if ratio < 1:
+                new_size = (int(img.width * ratio), int(img.height * ratio))
+                img = img.resize(new_size, Image.LANCZOS)
+            
+            # Save optimized image
+            output = io.BytesIO()
+            img.save(output, 'JPEG', quality=85, optimize=True)
+            return output.getvalue()
+    ```
+  </Tab>
+</Tabs>
 
-async function optimizeImage(inputBuffer) {
-  return await sharp(inputBuffer)
-    .resize(2000, 2000, {
-      fit: 'inside',
-      withoutEnlargement: true
-    })
-    .jpeg({
-      quality: 85,
-      progressive: true
-    })
-    .toBuffer();
-}
-```
+### 2. Batch Processing
 
-```python Python
-from PIL import Image
-import io
-
-def optimize_image(input_bytes):
-    with Image.open(io.BytesIO(input_bytes)) as img:
-        # Convert to RGB if needed
-        if img.mode in ('RGBA', 'P'):
-            img = img.convert('RGB')
-        
-        # Calculate new dimensions
-        max_size = 2000
-        ratio = min(max_size/img.width, max_size/img.height)
-        if ratio < 1:
-            new_size = (int(img.width * ratio), int(img.height * ratio))
-            img = img.resize(new_size, Image.LANCZOS)
-        
-        # Save optimized image
-        output = io.BytesIO()
-        img.save(output, 'JPEG', quality=85, optimize=True)
-        return output.getvalue()
-```
-
-</CodeGroup>
-
-## Upload Strategies
-
-### 1. Batch Uploads
-
-Implement efficient batch uploading:
+<Info>For multiple files, use batch uploading to reduce API calls and improve performance.</Info>
 
 ```javascript
 async function batchUpload(files, batchSize = 10) {
@@ -94,80 +95,16 @@ async function batchUpload(files, batchSize = 10) {
 }
 ```
 
-### 2. Chunked Uploads
+### 3. Validation
 
-Handle large files with chunked uploads:
-
-```javascript
-async function uploadLargeFile(file, chunkSize = 5 * 1024 * 1024) {
-  const chunks = Math.ceil(file.size / chunkSize);
-  const uploadId = await initializeUpload(file.name);
-  
-  const chunkPromises = [];
-  for (let i = 0; i < chunks; i++) {
-    const start = i * chunkSize;
-    const end = Math.min(start + chunkSize, file.size);
-    const chunk = file.slice(start, end);
-    
-    chunkPromises.push(
-      uploadChunk(chunk, i, uploadId)
-    );
-  }
-  
-  await Promise.all(chunkPromises);
-  return await finalizeUpload(uploadId);
-}
-```
-
-### 3. Progress Tracking
-
-Implement upload progress tracking:
-
-```javascript
-function uploadWithProgress(file, onProgress) {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    const formData = new FormData();
-    formData.append('file', file);
-
-    xhr.upload.addEventListener('progress', (event) => {
-      if (event.lengthComputable) {
-        const progress = (event.loaded / event.total) * 100;
-        onProgress(progress);
-      }
-    });
-
-    xhr.addEventListener('load', () => {
-      if (xhr.status === 200) {
-        resolve(JSON.parse(xhr.response));
-      } else {
-        reject(new Error('Upload failed'));
-      }
-    });
-
-    xhr.addEventListener('error', () => {
-      reject(new Error('Upload failed'));
-    });
-
-    xhr.open('POST', 'https://api.invaro.ai/api/v1/parse/upload');
-    xhr.setRequestHeader('Authorization', `Bearer ${apiKey}`);
-    xhr.send(formData);
-  });
-}
-```
-
-## Validation & Error Handling
-
-### 1. Pre-upload Validation
-
-Validate files before uploading:
+<Warning>Always validate files before uploading to prevent processing errors.</Warning>
 
 ```javascript
 function validateFile(file) {
   const validations = {
     size: file.size <= 10 * 1024 * 1024, // 10MB limit
     type: ['application/pdf', 'image/jpeg', 'image/png'].includes(file.type),
-    name: /^[a-zA-Z0-9-_\.]+$/.test(file.name) // Valid filename
+    name: /^[a-zA-Z0-9-_\.]+$/.test(file.name)
   };
 
   const errors = Object.entries(validations)
@@ -181,16 +118,15 @@ function validateFile(file) {
 }
 ```
 
-### 2. Retry Logic
+### 4. Error Handling
 
-Implement smart retry logic:
+<Info>Implement retry logic to handle transient failures gracefully.</Info>
 
 ```javascript
 async function uploadWithRetry(file, maxRetries = 3) {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const result = await uploadFile(file);
-      return result;
+      return await uploadFile(file);
     } catch (error) {
       if (!isRetryableError(error) || attempt === maxRetries - 1) {
         throw error;
@@ -201,149 +137,70 @@ async function uploadWithRetry(file, maxRetries = 3) {
     }
   }
 }
-
-function isRetryableError(error) {
-  return [
-    'NETWORK_ERROR',
-    'TIMEOUT_ERROR',
-    'SERVER_ERROR'
-  ].includes(error.code);
-}
 ```
 
-## Performance Optimization
+## Troubleshooting Guide
 
-### 1. Parallel Processing
+<AccordionGroup>
+  <Accordion title="File Size Issues" icon="file-circle-exclamation">
+    If your file exceeds 10MB:
+    - Use the optimization code above for images
+    - Compress PDFs using Adobe Acrobat or similar tools
+    - Split large documents into smaller parts
+    - Maintain image quality while reducing file size
+  </Accordion>
 
-Optimize multiple file processing:
+  <Accordion title="Upload Failures" icon="cloud-arrow-up">
+    Common causes and solutions:
+    - Network issues: Check your internet connection
+    - Invalid format: Verify file type and size
+    - Rate limits: Implement exponential backoff
+    - Server errors: Retry with error handling
+  </Accordion>
 
-```javascript
-async function processFiles(files, concurrency = 3) {
-  const queue = [...files];
-  const results = [];
-  
-  async function processNext() {
-    if (queue.length === 0) return;
-    
-    const file = queue.shift();
-    try {
-      const result = await processFile(file);
-      results.push(result);
-    } catch (error) {
-      results.push({ file, error });
-    }
-    
-    await processNext();
-  }
-  
-  await Promise.all(
-    Array(Math.min(concurrency, files.length))
-      .fill()
-      .map(() => processNext())
-  );
-  
-  return results;
-}
-```
-
-### 2. Caching
-
-Implement response caching:
-
-```javascript
-class UploadCache {
-  constructor(ttl = 3600000) { // 1 hour TTL
-    this.cache = new Map();
-    this.ttl = ttl;
-  }
-
-  async get(key) {
-    const cached = this.cache.get(key);
-    if (!cached) return null;
-    
-    if (Date.now() - cached.timestamp > this.ttl) {
-      this.cache.delete(key);
-      return null;
-    }
-    
-    return cached.data;
-  }
-
-  set(key, data) {
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now()
-    });
-  }
-}
-```
-
-## Security Best Practices
-
-### 1. File Type Verification
-
-Implement thorough file type checking:
-
-```javascript
-function verifyFileType(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = function(e) {
-      const arr = new Uint8Array(e.target.result).subarray(0, 4);
-      let header = '';
-      for(let i = 0; i < arr.length; i++) {
-        header += arr[i].toString(16);
-      }
-      
-      const signatures = {
-        pdf: '25504446', // %PDF
-        png: '89504e47', // PNG
-        jpeg: 'ffd8ffe0' // JPEG
-      };
-      
-      const detectedType = Object.entries(signatures)
-        .find(([_, sig]) => header.startsWith(sig))?.[0];
-      
-      if (!detectedType) {
-        reject(new Error('Invalid file type'));
-      } else {
-        resolve(detectedType);
-      }
-    };
-    reader.readAsArrayBuffer(file);
-  });
-}
-```
-
-### 2. Content Scanning
-
-Implement virus scanning:
-
-```javascript
-async function scanFile(file) {
-  const scanner = new VirusScanner();
-  try {
-    await scanner.scan(file);
-    return true;
-  } catch (error) {
-    console.error('File scan failed:', error);
-    throw new Error('File security check failed');
-  }
-}
-```
+  <Accordion title="Processing Errors" icon="gears">
+    To ensure successful processing:
+    - Use high-quality, clear documents
+    - Maintain proper document orientation
+    - Check for file corruption
+    - Follow format specifications
+  </Accordion>
+</AccordionGroup>
 
 ## Best Practices Summary
 
-<Card>
-  **Key Points**
-  - Optimize files before upload
-  - Implement batch uploading for multiple files
-  - Use chunked uploads for large files
-  - Track upload progress
-  - Validate files before upload
-  - Implement retry logic
-  - Use parallel processing
-  - Implement proper security checks
-  - Cache responses when appropriate
-  - Monitor upload performance
-</Card> 
+<CardGroup cols={2}>
+  <Card title="Document Quality" icon="image">
+    <Check>Use high resolution (300 DPI+)</Check>
+    <Check>Ensure proper lighting</Check>
+    <Check>Maintain clear text</Check>
+    <Check>Keep original aspect ratio</Check>
+  </Card>
+
+  <Card title="Upload Strategy" icon="cloud-arrow-up">
+    <Check>Batch similar documents</Check>
+    <Check>Validate before upload</Check>
+    <Check>Monitor progress</Check>
+    <Check>Handle errors gracefully</Check>
+  </Card>
+
+  <Card title="Error Prevention" icon="shield-check">
+    <Check>Verify file formats</Check>
+    <Check>Check size limits</Check>
+    <Check>Implement retries</Check>
+    <Check>Log all failures</Check>
+  </Card>
+
+  <Card title="Performance" icon="bolt">
+    <Check>Use batch uploads</Check>
+    <Check>Optimize file size</Check>
+    <Check>Cache when possible</Check>
+    <Check>Monitor rate limits</Check>
+  </Card>
+</CardGroup>
+
+<Note>
+  Need help? Contact our support team:
+  - Email: [support@invaro.ai](mailto:support@invaro.ai)
+  - Status: [status.invaro.ai](https://status.invaro.ai)
+</Note> 

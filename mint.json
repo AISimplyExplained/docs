@@ -45,39 +45,57 @@
   ],
   "navigation": [
     {
-      "group": "Get Started",
+      "group": "Getting Started",
       "pages": [
-        "introduction",
+        {
+          "group": "Introduction",
+          "pages": [
+            "introduction/what-is-document-parsing",
+            "introduction/key-features",
+            "introduction/use-cases",
+            "introduction/supported-formats"
+          ]
+        },
         "quickstart"
+      ]
+    },
+    {
+      "group": "Core",
+      "pages": [
+        "api-reference/authentication",
+        "api-reference/errors",
+        "api-reference/rate-limits"
       ]
     },
     {
       "group": "API Endpoints",
       "pages": [
-        "api-reference/authentication",
-        "api-reference/file-upload",
-        "api-reference/statement-processing",
-        "api-reference/invoice-processing",
-        "api-reference/job-management"
+        {
+          "group": "File Upload",
+          "pages": [
+            "api-reference/endpoints/upload"
+          ]
+        },
+        {
+          "group": "Bank Statements",
+          "pages": [
+            "api-reference/endpoints/process-statements",
+            "api-reference/endpoints/get-statement-status"
+          ]
+        },
+        {
+          "group": "Invoices",
+          "pages": [
+            "api-reference/endpoints/process-invoices",
+            "api-reference/endpoints/get-invoice-status"
+          ]
+        }
       ]
     },
     {
-      "group": "API Guidelines",
+      "group": "Best Practices",
       "pages": [
-        "api-reference/rate-limits",
-        "api-reference/errors",
-        "api-reference/best-practices/error-handling",
         "api-reference/best-practices/file-uploads"
-      ]
-    },
-    {
-      "group": "Endpoints",
-      "pages": [
-        "api-reference/endpoints/upload",
-        "api-reference/endpoints/process-statements",
-        "api-reference/endpoints/get-statement-status",
-        "api-reference/endpoints/process-invoices",
-        "api-reference/endpoints/get-invoice-status"
       ]
     }
   ],
@@ -91,5 +109,15 @@
       "method": "bearer"
     }
   },
-  "openapi": "./openapi.json"
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Invaro Document Processing API",
+    "description": "API for processing bank statements and invoices using OCR and AI",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Invaro Support",
+      "email": "support@invaro.ai",
+      "url": "https://docs.invaro.ai"
+    }
+  }
 }

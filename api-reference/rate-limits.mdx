@@ -5,100 +5,109 @@ description: 'Understanding API rate limits and best practices'
 
 {/* # Rate Limits */}
 
-To ensure fair usage and system stability, Invaro API implements rate limiting on all endpoints.
+Rate limits are enforced per API key to ensure fair usage of the API and maintain service stability.
 
-## Default Limits
+<Note>
+  All rate limits are calculated on a per-minute basis and reset automatically at the start of each window.
+</Note>
 
-<Card>
-  - **60 requests per minute** per API key
-  - **Batch operations count as multiple requests**
-  - Rate limits are calculated on a rolling window
-</Card>
+## Rate Limit Overview
+
+  <Card title="Default Limits" icon="gauge-high">
+    - **60 requests** per minute per API key
+    - Batch operations count as multiple requests
+    - Rolling window reset
+  </Card>
+
+  <Card title="Batch Operations" icon="layer-group">
+    Each item in a batch counts as one request:
+    - Uploading 10 files = 10 requests
+    - Processing 5 statements = 5 requests
+  </Card>
 
 ## Rate Limit Headers
 
-All API responses include headers to help you track your rate limit status:
+The API includes rate limit information in the response headers:
 
-<ResponseField name="X-RateLimit-Limit" type="number">
-  The maximum number of requests allowed per minute
+<ResponseField name="Rate Limit Headers" type="object">
+  <Expandable title="Header Details">
+    ```http
+    X-RateLimit-Limit: 60
+    X-RateLimit-Remaining: 45
+    X-RateLimit-Reset: 1704624000
+    ```
+
+    - `X-RateLimit-Limit`: Maximum requests allowed per minute
+    - `X-RateLimit-Remaining`: Number of requests remaining in the current window
+    - `X-RateLimit-Reset`: Unix timestamp when the rate limit will reset
+  </Expandable>
 </ResponseField>
 
-<ResponseField name="X-RateLimit-Remaining" type="number">
-  The number of requests remaining in the current window
-</ResponseField>
+## Handling Rate Limits
 
-<ResponseField name="X-RateLimit-Reset" type="number">
-  Unix timestamp when the rate limit window resets
-</ResponseField>
+<Steps>
+  1. **Monitor Headers**
+     Check the `X-RateLimit-Remaining` header to track your remaining requests.
 
-### Example Headers
-```http
-X-RateLimit-Limit: 60
-X-RateLimit-Remaining: 45
-X-RateLimit-Reset: 1704624000
-```
+  2. **Implement Backoff**
+     When you receive a rate limit error, wait until the reset time before retrying:
+     ```json
+     {
+       "success": false,
+       "error": {
+         "code": "RATE_LIMIT_EXCEEDED",
+         "message": "Too many requests",
+         "details": "Please wait before making more requests"
+       }
+     }
+     ```
 
-## Rate Limit Response
-
-When you exceed the rate limit, you'll receive a `429 Too Many Requests` response:
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "RATE_LIMIT_EXCEEDED",
-    "message": "Too many requests. Please try again in 23 seconds.",
-    "retry_after": 23
-  }
-}
-```
-
-## Batch Operations
-
-When using batch operations, keep in mind:
-
-1. **File Upload Endpoint**
-   - Each file in a batch upload counts as one request
-   - Uploading 10 files counts as 10 requests against your limit
-
-2. **Processing Endpoints**
-   - Each file ID in a processing request counts as one request
-   - Processing 5 files counts as 5 requests
+  3. **Optimize Requests**
+     Use batch operations when possible to maximize your rate limit usage.
+</Steps>
 
 ## Best Practices
 
-1. **Implement Exponential Backoff**
-   ```javascript
-   async function makeRequest(retries = 3, baseDelay = 1000) {
-     for (let i = 0; i < retries; i++) {
-       try {
-         const response = await fetch('/api/endpoint');
-         if (response.status !== 429) return response;
-         
-         const retryAfter = response.headers.get('Retry-After');
-         const delay = retryAfter ? parseInt(retryAfter) * 1000 : baseDelay * Math.pow(2, i);
-         await new Promise(resolve => setTimeout(resolve, delay));
-       } catch (error) {
-         if (i === retries - 1) throw error;
-       }
-     }
-   }
-   ```
+  <Card title="Implement Exponential Backoff" icon="clock-rotate-left">
+    When rate limited, use exponential backoff to prevent overwhelming the API:
+    ```javascript
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
-2. **Monitor Rate Limits**
-   - Track remaining requests using response headers
-   - Implement rate limit warning systems
-   - Consider using a queue for high-volume operations
+    async function makeRequest(retries = 3) {
+      for (let i = 0; i < retries; i++) {
+        try {
+          return await apiRequest();
+        } catch (error) {
+          if (error.code !== 'RATE_LIMIT_EXCEEDED') throw error;
+          await sleep(Math.pow(2, i) * 1000);
+        }
+      }
+    }
+    ```
+  </Card>
 
-3. **Optimize Request Usage**
-   - Use batch operations when possible
-   - Cache responses when appropriate
-   - Implement request throttling
+  <Card title="Batch Processing" icon="boxes-stacked">
+    Group multiple items into single requests:
+    ```javascript
+    // Instead of multiple single uploads
+    const files = ['doc1.pdf', 'doc2.pdf', 'doc3.pdf'];
+    const formData = new FormData();
+    files.forEach(file => formData.append('files', file));
+    
+    // Single batch upload
+    await api.upload(formData);
+    ```
+  </Card>
 
-## Enterprise Plans
+## Need Higher Limits?
 
-If you need higher rate limits, contact our [sales team](mailto:sales@invaro.ai) to discuss enterprise plans with:
-
-- Higher rate limits
-- Dedicated support
-- Custom solutions 
+<Card title="Enterprise Plans" icon="building">
+  For higher rate limits and dedicated support, contact our [sales team](mailto:sales@invaro.ai).
+  
+  Enterprise plans include:
+  - Custom rate limits
+  - Priority support
+  - Dedicated account manager
+</Card> 

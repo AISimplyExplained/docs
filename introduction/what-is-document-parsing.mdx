@@ -1,0 +1,84 @@
+---
+title: 'What is Document Parsing?'
+description: 'Understanding document parsing and its benefits'
+---
+
+<Note>
+  Transform how you handle financial documents with our specialized toolkit for parsing bank statements and invoices with unmatched precision.
+</Note>
+
+## Overview
+
+<CardGroup cols={2}>
+  <Card title="Automated Extraction" icon="robot">
+    Convert financial documents into structured, machine-readable data automatically using advanced AI technology.
+  </Card>
+  
+  <Card title="Efficient Processing" icon="bolt">
+    Process bank statements and invoices in seconds, eliminating manual data entry and reducing errors.
+  </Card>
+</CardGroup>
+
+## How it Works
+
+<Steps>
+  <Step title="Document Upload">
+    Upload your financial documents through our secure API
+    <CodeGroup>
+    ```bash
+    POST /api/v1/parse/upload
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="AI Processing">
+    Our advanced AI analyzes and extracts relevant information
+    <CardGroup cols={2}>
+      <Card title="OCR Analysis" icon="magnifying-glass">
+        Converts document images to text
+      </Card>
+      <Card title="Data Extraction" icon="wand-magic-sparkles">
+        Identifies and extracts key information
+      </Card>
+    </CardGroup>
+  </Step>
+
+  <Step title="Structured Data">
+    Receive clean, structured data ready for your application
+    ```json
+    {
+      "account_info": {
+        "account_number": "1234567890",
+        "bank_name": "Example Bank"
+      },
+      "transactions": [
+        {
+          "date": "2024-01-01",
+          "description": "Payment",
+          "amount": 100.50
+        }
+      ]
+    }
+    ```
+  </Step>
+</Steps>
+
+## Benefits
+
+<CardGroup cols={3}>
+  <Card title="Accuracy" icon="bullseye">
+    99.9% accurate data extraction with AI-powered OCR
+  </Card>
+  
+  <Card title="Speed" icon="gauge-high">
+    Process documents in seconds instead of hours
+  </Card>
+  
+  <Card title="Automation" icon="gears">
+    Eliminate manual data entry and human errors
+  </Card>
+</CardGroup>
+
+<Note>
+  Ready to get started? Check out our [quickstart guide](/quickstart) or [try it now](https://dashboard.invaro.ai/signup).
+</Note> 

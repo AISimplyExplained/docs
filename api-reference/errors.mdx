@@ -5,22 +5,103 @@ description: 'Learn about Invaro API error codes and handling'
 
 {/* # Error Handling */}
 
-The Invaro API uses conventional HTTP response codes and provides detailed error information to help you handle errors effectively.
+When an error occurs, the API will return an appropriate HTTP status code along with a JSON response containing error details.
 
 ## Error Response Format
 
-All API errors follow a consistent format:
+All error responses follow this format:
 
 ```json
 {
   "success": false,
   "error": {
     "code": "ERROR_CODE",
-    "message": "Human-readable error message",
-    "details": "Additional error details (optional)"
+    "message": "Human readable error message",
+    "details": "Additional error details when available"
   }
 }
 ```
+
+## Common Error Codes
+
+| Code | Description | HTTP Status |
+|------|-------------|-------------|
+| UNAUTHORIZED | Authentication failed | 401 |
+| INVALID_REQUEST | Malformed request | 400 |
+| RATE_LIMIT_EXCEEDED | Too many requests | 429 |
+| VALIDATION_ERROR | Request validation failed | 400 |
+| INTERNAL_SERVER_ERROR | Server error | 500 |
+
+## Example Error Scenarios
+
+### Authentication Error
+```json
+{
+  "success": false,
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Invalid API key provided"
+  }
+}
+```
+
+### Rate Limit Error
+```json
+{
+  "success": false,
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "Too many requests"
+  }
+}
+```
+
+### Validation Error
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid file type",
+    "details": "Only PDF, JPG, JPEG, and PNG files are allowed"
+  }
+}
+```
+
+## Error Categories
+
+<CardGroup>
+  <Card title="Retryable Errors" icon="rotate-right">
+    These errors are temporary and can be resolved by retrying the request after a delay:
+    
+    - **Rate Limit (429)**
+      Exceeded request limits
+    
+    - **Gateway Errors**
+      - Bad Gateway (502)
+      - Service Unavailable (503)
+      - Gateway Timeout (504)
+    
+    - **Processing Failures**
+      Temporary processing issues
+  </Card>
+
+  <Card title="Non-Retryable Errors" icon="circle-xmark">
+    These errors require fixes before retrying:
+    
+    - **Authentication (401, 403)**
+      Invalid or unauthorized API key
+    
+    - **Validation (400)**
+      Invalid request parameters
+    
+    - **Not Found (404)**
+      Resource doesn't exist
+    
+    - **Processing Failures**
+      Permanent processing errors
+  </Card>
+</CardGroup>
 
 ## HTTP Status Codes
 
@@ -54,93 +135,6 @@ All API errors follow a consistent format:
     - `504` Gateway Timeout - Request timeout
   </Expandable>
 </ResponseField>
-
-## Common Error Codes
-
-### Authentication Errors
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "UNAUTHORIZED",
-    "message": "Invalid API key provided"
-  }
-}
-```
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "FORBIDDEN",
-    "message": "API key does not have access to this resource"
-  }
-}
-```
-
-### Validation Errors
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Invalid request parameters",
-    "details": {
-      "file_ids": "Must provide at least one file ID"
-    }
-  }
-}
-```
-
-### Rate Limit Errors
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "RATE_LIMIT_EXCEEDED",
-    "message": "Too many requests. Please try again in 23 seconds.",
-    "retry_after": 23
-  }
-}
-```
-
-### Resource Errors
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "RESOURCE_NOT_FOUND",
-    "message": "The requested resource was not found"
-  }
-}
-```
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "RESOURCE_CONFLICT",
-    "message": "Resource already exists"
-  }
-}
-```
-
-### Processing Errors
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "PROCESSING_ERROR",
-    "message": "Failed to process document",
-    "details": "Unable to extract text from document"
-  }
-}
-```
 
 ## Error Handling Best Practices
 
@@ -218,23 +212,8 @@ function logError(error) {
 }
 ```
 
-## Error Categories
-
-<Card>
-  **Retryable Errors**
-  - Rate limit exceeded (429)
-  - Gateway errors (502, 503, 504)
-  - Temporary processing failures
-
-  **Non-Retryable Errors**
-  - Authentication errors (401, 403)
-  - Validation errors (400)
-  - Not found errors (404)
-  - Permanent processing failures
-</Card>
-
 ## Support
 
-If you encounter persistent errors or need assistance, contact our support:
+If you encounter persistent errors or need assistance:
 - Email: [support@invaro.ai](mailto:support@invaro.ai)
 - Status Page: [status.invaro.ai](https://status.invaro.ai) 

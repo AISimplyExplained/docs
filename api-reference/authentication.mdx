@@ -5,58 +5,146 @@ description: 'Learn how to authenticate your API requests with Invaro'
 
 {/* # Authentication */}
 
-Invaro API uses Bearer token authentication for securing all API endpoints. You'll need to include your API key in the Authorization header for all requests.
+The Invaro API uses API keys to authenticate requests. All API requests must be made over HTTPS and include your API key in the Authorization header using Bearer token authentication.
 
-## API Keys
+## Getting Your API Key
 
-Your API key serves as your account's identity and should be kept secure. You can obtain your API key from the Invaro dashboard.
+1. Sign in to your [Invaro Dashboard](https://toolkit.invaro.ai/)
+2. Navigate to **Dashboard** > **API Keys**
+3. Click **Generate New API Key**
+4. Copy and securely store your API key
+
+## Using Your API Key
 
 ### Authorization Header
 
-Include your API key in the `Authorization` header using the Bearer scheme:
+All API requests must include your API key in the `Authorization` header using the Bearer scheme:
 
 ```bash
 Authorization: Bearer your_api_key_here
 ```
 
-### Example Request
+### Example Requests
 
-```bash
+<CodeGroup>
+
+```bash cURL
 curl -X POST "https://api.invaro.ai/api/v1/parse/upload" \
   -H "Authorization: Bearer your_api_key" \
   -F "files=@statement.pdf"
 ```
 
-## Security Best Practices
+```javascript JavaScript
+const response = await fetch('https://api.invaro.ai/api/v1/parse/upload', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer your_api_key'
+  },
+  body: formData
+});
+```
 
-1. **Keep your API key secure**
-   - Never share your API key or commit it to version control
-   - Use environment variables to store your API key
-   - Rotate your API key periodically
+```python Python
+import requests
 
-2. **Use HTTPS**
-   - Always make requests over HTTPS
-   - We reject all non-HTTPS requests
+headers = {
+    'Authorization': 'Bearer your_api_key'
+}
 
-3. **Key Rotation**
-   - You can generate new API keys from the dashboard
-   - Maintain a list of active keys
-   - Revoke compromised keys immediately
+response = requests.post(
+    'https://api.invaro.ai/api/v1/parse/upload',
+    headers=headers,
+    files={'file': open('statement.pdf', 'rb')}
+)
+```
 
-## Rate Limiting
+</CodeGroup>
 
-Each API key has its own rate limit. See our [Rate Limits](/api-reference/rate-limits) page for more details.
+## API Key Best Practices
 
-## Error Responses
+### Security Guidelines
 
-If authentication fails, you'll receive a `401 Unauthorized` response:
+1. **Protect Your API Keys**
+   - Never expose API keys in client-side code
+   - Don't commit API keys to version control
+   - Use environment variables or secure secret management systems
+   - Avoid sharing API keys in public forums or documentation
+
+2. **Key Management**
+   - Generate separate API keys for different environments (development, staging, production)
+   - Implement key rotation policies
+   - Monitor API key usage through the dashboard
+   - Delete unused API keys
+
+3. **Access Control**
+   - Use the principle of least privilege
+   - Assign appropriate permissions to each API key
+   - Regularly audit API key access and usage
+
+### Implementation Examples
+
+<CodeGroup>
+
+```javascript Node.js
+// Using environment variables
+require('dotenv').config();
+
+const apiKey = process.env.INVARO_API_KEY;
+const headers = {
+  'Authorization': `Bearer ${apiKey}`
+};
+```
+
+```python Python
+# Using environment variables
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+api_key = os.getenv('INVARO_API_KEY')
+headers = {
+    'Authorization': f'Bearer {api_key}'
+}
+```
+
+</CodeGroup>
+
+## Error Handling
+
+### Authentication Errors
+
+| Status Code | Error Code | Description |
+|------------|------------|-------------|
+| 401 | UNAUTHORIZED | Invalid or missing API key |
+| 403 | FORBIDDEN | API key lacks required permissions |
+
+### Example Error Response
 
 ```json
 {
   "success": false,
   "error": {
     "code": "UNAUTHORIZED",
-    "message": "Invalid API key provided"
+    "message": "Invalid API key provided",
+    "details": "Please check your API key or generate a new one from the dashboard"
   }
 }
-``` 
+```
+
+## Rate Limiting
+
+Each API key has its own rate limits. When exceeded, you'll receive a `429 Too Many Requests` response. See our [Rate Limits](/api-reference/rate-limits) page for detailed information about:
+
+- Default rate limits
+- Rate limit headers
+- Handling rate limit errors
+- Best practices for staying within limits
+
+## Support
+
+If you encounter any authentication issues:
+
+1. Verify your API key is valid and active in the dashboard
+2. Check our [Error Handling Guide](/api-reference/errors)
+3. Contact [support@invaro.ai](mailto:support@invaro.ai) for assistance

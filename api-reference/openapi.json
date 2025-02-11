@@ -14,10 +14,6 @@
         {
             "url": "https://api.invaro.ai/api/v1",
             "description": "Production API"
-        },
-        {
-            "url": "https://sandbox.api.invaro.ai/v1",
-            "description": "Sandbox API"
         }
     ],
     "security": [
@@ -79,20 +75,15 @@
                                                         "properties": {
                                                             "file_id": {
                                                                 "type": "string",
-                                                                "example": "1234567890_statement.pdf"
-                                                            },
-                                                            "document_id": {
-                                                                "type": "string",
-                                                                "example": "doc_abc123"
+                                                                "example": "1739260380783576729_invoice3.pdf"
                                                             },
                                                             "file_url": {
                                                                 "type": "string",
-                                                                "example": "https://storage.invaro.ai/files/1234567890_statement.pdf"
+                                                                "example": "https://wssbebkqiavijahjhako.supabase.co/storage/v1/object/public/invoices/1739260380783576729_invoice3.pdf"
                                                             },
-                                                            "error": {
+                                                            "doc_id": {
                                                                 "type": "string",
-                                                                "nullable": true,
-                                                                "example": null
+                                                                "example": "f663d9ac-6d5b-4cfe-bf30-ac19ad9429e4"
                                                             }
                                                         }
                                                     }
@@ -145,13 +136,13 @@
                         "application/json": {
                             "schema": {
                                 "type": "object",
+                                "required": [
+                                    "document_id"
+                                ],
                                 "properties": {
-                                    "file_ids": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "description": "Array of file IDs to process"
+                                    "document_id": {
+                                        "type": "string",
+                                        "description": "Document ID of the statement to process"
                                     }
                                 }
                             }
@@ -175,15 +166,11 @@
                                             "properties": {
                                                 "job_id": {
                                                     "type": "string",
-                                                    "example": "job_123abc"
+                                                    "example": "job_1739261168870934041"
                                                 },
                                                 "status": {
                                                     "type": "string",
-                                                    "example": "processing"
-                                                },
-                                                "estimated_completion": {
-                                                    "type": "string",
-                                                    "format": "date-time"
+                                                    "example": "pending"
                                                 }
                                             }
                                         }
@@ -230,7 +217,8 @@
                                             "type": "object",
                                             "properties": {
                                                 "job_id": {
-                                                    "type": "string"
+                                                    "type": "string",
+                                                    "example": "job_1739261168870934041"
                                                 },
                                                 "status": {
                                                     "type": "string",
@@ -238,7 +226,22 @@
                                                         "processing",
                                                         "completed",
                                                         "failed"
-                                                    ]
+                                                    ],
+                                                    "example": "completed"
+                                                },
+                                                "file_id": {
+                                                    "type": "string",
+                                                    "example": "sample_invoice.pdf"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-02-11T08:19:37Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-02-11T08:19:53Z"
                                                 },
                                                 "progress": {
                                                     "type": "number",
@@ -280,30 +283,12 @@
                             "schema": {
                                 "type": "object",
                                 "required": [
-                                    "document_ids"
+                                    "document_id"
                                 ],
                                 "properties": {
-                                    "document_ids": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "description": "Array of document IDs to process"
-                                    },
-                                    "options": {
-                                        "type": "object",
-                                        "properties": {
-                                            "extract_line_items": {
-                                                "type": "boolean",
-                                                "default": true,
-                                                "description": "Extract line items from invoices"
-                                            },
-                                            "extract_tables": {
-                                                "type": "boolean",
-                                                "default": true,
-                                                "description": "Extract tables from invoices"
-                                            }
-                                        }
+                                    "document_id": {
+                                        "type": "string",
+                                        "description": "Document ID of the invoice to process"
                                     }
                                 }
                             }
@@ -327,15 +312,11 @@
                                             "properties": {
                                                 "job_id": {
                                                     "type": "string",
-                                                    "example": "job_456def"
+                                                    "example": "job_1739261168870934041"
                                                 },
                                                 "status": {
                                                     "type": "string",
-                                                    "example": "processing"
-                                                },
-                                                "estimated_completion": {
-                                                    "type": "string",
-                                                    "format": "date-time"
+                                                    "example": "pending"
                                                 }
                                             }
                                         }
@@ -374,40 +355,146 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
+                                        "job_id": {
+                                            "type": "string",
+                                            "example": "job_123456789"
                                         },
-                                        "data": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "processing",
+                                                "completed",
+                                                "failed"
+                                            ],
+                                            "example": "completed"
+                                        },
+                                        "file_id": {
+                                            "type": "string",
+                                            "example": "sample_invoice.pdf"
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2025-02-11T08:19:37Z"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2025-02-11T08:19:53Z"
+                                        },
+                                        "result": {
                                             "type": "object",
                                             "properties": {
-                                                "job_id": {
-                                                    "type": "string"
-                                                },
-                                                "status": {
-                                                    "type": "string",
-                                                    "enum": [
-                                                        "processing",
-                                                        "completed",
-                                                        "failed"
-                                                    ]
-                                                },
-                                                "progress": {
-                                                    "type": "number",
-                                                    "example": 60
-                                                },
-                                                "results": {
+                                                "bank_details": {
                                                     "type": "object",
                                                     "properties": {
-                                                        "invoice_info": {
-                                                            "type": "object"
+                                                        "IFSC": {
+                                                            "type": "string",
+                                                            "example": "ABC0001234"
                                                         },
-                                                        "line_items": {
-                                                            "type": "array"
+                                                        "SWIFT_CODE": {
+                                                            "type": "string",
+                                                            "example": "ABCDINBB"
+                                                        },
+                                                        "account_number": {
+                                                            "type": "string",
+                                                            "example": "123456789012"
+                                                        },
+                                                        "bank_name": {
+                                                            "type": "string",
+                                                            "example": "XYZ Bank Ltd."
+                                                        }
+                                                    }
+                                                },
+                                                "buyer_details": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "GSTIN": {
+                                                            "type": "string",
+                                                            "example": "00AAAAA0000A1Z0"
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "ABC Enterprises"
+                                                        },
+                                                        "address": {
+                                                            "type": "string",
+                                                            "example": "123, Main Street, City, Country"
+                                                        },
+                                                        "phone": {
+                                                            "type": "string",
+                                                            "example": "9876543210"
+                                                        },
+                                                        "state_code": {
+                                                            "type": "string",
+                                                            "example": "XY"
+                                                        }
+                                                    }
+                                                },
+                                                "invoice_details": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "GR_date": {
+                                                            "type": "string",
+                                                            "example": "01/01/2025"
+                                                        },
+                                                        "GR_number": {
+                                                            "type": "string",
+                                                            "example": "987654"
+                                                        }
+                                                    }
+                                                },
+                                                "tax_calculation": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "HSN": {
+                                                            "type": "string",
+                                                            "example": "12345678"
+                                                        },
+                                                        "IGST_amount": {
+                                                            "type": "string",
+                                                            "example": "1000.00"
+                                                        },
+                                                        "IGST_percentage": {
+                                                            "type": "string",
+                                                            "example": "10%"
+                                                        },
+                                                        "reverse_charge_applicable": {
+                                                            "type": "string",
+                                                            "example": "Not applicable"
+                                                        }
+                                                    }
+                                                },
+                                                "total_calculation": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "IGST_at_10_percentage": {
+                                                            "type": "string",
+                                                            "example": "100.00"
                                                         }
                                                     }
                                                 }
                                             }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - Invalid job ID or request format",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Invalid job ID provided"
                                         }
                                     }
                                 }
@@ -424,6 +511,12 @@
                 "type": "http",
                 "scheme": "bearer",
                 "bearerFormat": "JWT"
+            },
+            "ApiKeyAuth": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "Authorization",
+                "description": "Add your API key with 'Bearer' prefix: Bearer your_api_key"
             }
         }
     }

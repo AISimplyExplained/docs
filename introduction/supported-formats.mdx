@@ -1,0 +1,137 @@
+---
+title: 'Supported Formats'
+description: 'File formats and limitations'
+---
+
+<Note>
+  Our API supports common document formats while maintaining strict quality standards for optimal processing results.
+</Note>
+
+## Supported Formats
+
+<CardGroup cols={3}>
+  <Card title="PDF Documents" icon="file-pdf">
+    <div className="space-y-2">
+      <p>Preferred format for all documents</p>
+      <div className="mt-2">
+        <Check>Digital PDFs</Check>
+        <Check>Scanned documents</Check>
+        <Check>Text-searchable PDFs</Check>
+      </div>
+    </div>
+  </Card>
+
+  <Card title="JPEG/JPG" icon="file-image">
+    <div className="space-y-2">
+      <p>High-quality image format</p>
+      <div className="mt-2">
+        <Check>Scanned documents</Check>
+        <Check>Mobile captures</Check>
+        <Check>Digital photos</Check>
+      </div>
+    </div>
+  </Card>
+
+  <Card title="PNG" icon="image">
+    <div className="space-y-2">
+      <p>Lossless image format</p>
+      <div className="mt-2">
+        <Check>Screenshot uploads</Check>
+        <Check>Digital scans</Check>
+        <Check>Web exports</Check>
+      </div>
+    </div>
+  </Card>
+</CardGroup>
+
+## Technical Requirements
+
+<CardGroup cols={2}>
+  <Card title="File Specifications" icon="ruler">
+    <div className="space-y-2">
+      <p>Document requirements</p>
+      <div className="mt-2">
+        <Check>Maximum size: 10MB per file</Check>
+        <Check>Minimum resolution: 300 DPI</Check>
+        <Check>Clear, legible text</Check>
+        <Check>Proper orientation</Check>
+      </div>
+    </div>
+  </Card>
+
+  <Card title="Batch Processing" icon="layer-group">
+    <div className="space-y-2">
+      <p>Upload limitations</p>
+      <div className="mt-2">
+        <Check>Up to 50 files per request</Check>
+        <Check>Combined size limit: 500MB</Check>
+        <Check>Parallel processing support</Check>
+        <Check>Bulk upload capability</Check>
+      </div>
+    </div>
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+<Tabs>
+  <Tab title="Document Quality">
+    <CardGroup cols={2}>
+      <Card title="Optimal Settings" icon="sliders">
+        <div className="space-y-2">
+          <p>For best results:</p>
+          <div className="mt-2">
+            <Check>Use 300 DPI or higher</Check>
+            <Check>Ensure proper lighting</Check>
+            <Check>Maintain aspect ratio</Check>
+            <Check>Avoid blurry images</Check>
+          </div>
+        </div>
+      </Card>
+
+      <Card title="Common Issues" icon="triangle-exclamation">
+        <div className="space-y-2">
+          <p>What to avoid:</p>
+          <div className="mt-2">
+            <Warning>Low resolution scans</Warning>
+            <Warning>Blurry or skewed images</Warning>
+            <Warning>Poor lighting conditions</Warning>
+            <Warning>Compressed files</Warning>
+          </div>
+        </div>
+      </Card>
+    </CardGroup>
+  </Tab>
+
+  <Tab title="File Preparation">
+    <CardGroup cols={2}>
+      <Card title="Before Upload" icon="file-arrow-up">
+        <div className="space-y-2">
+          <p>Preparation steps:</p>
+          <div className="mt-2">
+            <Check>Remove password protection</Check>
+            <Check>Ensure proper orientation</Check>
+            <Check>Optimize file size</Check>
+            <Check>Verify file format</Check>
+          </div>
+        </div>
+      </Card>
+
+      <Card title="Processing Tips" icon="lightbulb">
+        <div className="space-y-2">
+          <p>For faster processing:</p>
+          <div className="mt-2">
+            <Check>Group similar documents</Check>
+            <Check>Use consistent formats</Check>
+            <Check>Maintain file structure</Check>
+            <Check>Follow naming conventions</Check>
+          </div>
+        </div>
+      </Card>
+    </CardGroup>
+  </Tab>
+</Tabs>
+
+<Note>
+  Need help with file preparation? Check our [best practices guide](/api-reference/best-practices/file-uploads) or [contact support](mailto:support@invaro.ai).
+</Note> 
