@@ -1,280 +1,512 @@
-# API Documentation
+# Bank Statement & Invoice Parser API
 
-## Overview
+A high-performance API service for parsing and analyzing bank statements and invoices using AI. Built with Go, this service provides secure, scalable, and rate-limited endpoints for document processing.
 
-The Bank Statement & Invoice Parser API provides endpoints for processing financial documents. All endpoints use JSON for request/response bodies except for file uploads which use multipart/form-data.
+## 🚀 Features
 
-## Base URL
+- **Document Processing**
+  - Bank statement parsing (PDF)
+  - Invoice analysis (PDF, JPG, JPEG, PNG)
+  - Multi-page document support
+  - Batch processing capabilities
 
-```
-https://your-api-domain.com/api/v1
-```
+- **Security & Performance**
+  - API key authentication via Keyfolio
+  - Rate limiting and usage tracking
+  - Request validation and sanitization
+  - Parallel processing for batch requests
 
-## Authentication
+- **Storage & Queue**
+  - Supabase storage integration
+  - Async job processing
+  - Job status tracking
+  - Batch operation support
 
-All endpoints require Bearer token authentication:
+## 🔑 Authentication
 
-```http
-Authorization: Bearer your_api_key_here
-```
+All API endpoints (except `/`) require authentication using Bearer tokens:
 
-## Endpoints
-
-### 1. File Upload
-
-Upload files for processing.
-
-**Endpoint:** `POST /parse/upload`
-
-**Content-Type:** `multipart/form-data`
-
-**Request Parameters:**
-- `files`: Array of files (PDF, JPG, JPEG, PNG)
-  - Maximum 50 files
-  - Maximum 10MB per file
-
-**Example Request:**
 ```bash
-curl -X POST "https://your-api-domain.com/api/v1/parse/upload" \
+curl -H "Authorization: Bearer your_api_key" ...
+```
+
+To get an API key:
+
+1. Contact the administrator for a Keyfolio API key
+2. Use the key in the Authorization header
+3. Monitor your usage in the Keyfolio dashboard
+
+## 📚 API Documentation
+
+### File Upload
+
+**POST** `/api/v1/parse/upload`
+- Uploads files for processing
+- Supports PDF, JPG, JPEG, PNG
+- Max 50 files per request
+- Max 10MB per file
+- **Required**: `type` parameter must be either "statement" or "invoice"
+
+Request:
+```bash
+# For bank statements
+curl -X POST "https://api.invaro.ai/api/v1/parse/upload" \
   -H "Authorization: Bearer your_api_key" \
   -F "files=@statement.pdf" \
-  -F "files=@invoice.jpg"
+  -F "type=statement"
+
+# For invoices
+curl -X POST "https://api.invaro.ai/api/v1/parse/upload" \
+  -H "Authorization: Bearer your_api_key" \
+  -F "files=@invoice.pdf" \
+  -F "type=invoice"
 ```
 
-**Success Response:**
+Response:
 ```json
 {
   "success": true,
   "data": {
-    "files": [
-      {
-        "file_id": "1234567890_statement.pdf",
-        "file_url": "https://storage.com/files/1234567890_statement.pdf",
-        "error": null
-      },
-      {
-        "file_id": "1234567890_invoice.jpg",
-        "file_url": "https://storage.com/files/1234567890_invoice.jpg",
-        "error": null
-      }
-    ],
+    "file_id": "1234567890_statement.pdf",
+    "file_url": "https://storage.googleapis.com/bank-statements/1234567890_statement.pdf",
+    "doc_id": "uuid-of-document",
     "status": "done"
   }
 }
 ```
 
-**Error Response:**
+### Bank Statement Processing
+
+**POST** `/api/v1/parse/statements`
+- Analyzes bank statements
+- Supports single or multiple files
+
+Request (Option 1 - Simplified):
 ```json
 {
-  "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Invalid file type",
-    "details": "Only PDF, JPG, JPEG, and PNG files are allowed"
-  }
+  "document_id": "uuid-of-document"
 }
 ```
 
-### 2. Bank Statement Processing
-
-Process bank statements for data extraction.
-
-**Endpoint:** `POST /parse/statements`
-
-**Content-Type:** `application/json`
-
-**Request Body:**
+Request (Option 2 - Legacy):
 ```json
 {
-  "file_ids": [
-    "1234567890_statement.pdf"
-  ]
+  "file_id": "1234567890_statement.pdf",
+  "document_id": "uuid-of-document"
 }
 ```
 
-**Success Response:**
+Response:
 ```json
 {
   "success": true,
   "data": {
-    "job_id": "job_123abc",
-    "status": "processing",
-    "estimated_completion": "2024-01-07T10:05:00Z"
+    "job_id": "job_123",
+    "status": "pending",
+    "created_at": "2024-01-07T10:00:00Z",
+    "updated_at": "2024-01-07T10:00:00Z"
   }
 }
 ```
 
-### 3. Invoice Processing
+### Invoice Processing
 
-Process invoices for data extraction.
+**POST** `/api/v1/parse/invoices`
+- Analyzes invoices using AI
+- Extracts key information
 
-**Endpoint:** `POST /parse/invoices`
-
-**Content-Type:** `application/json`
-
-**Request Body:**
+Request (Option 1 - Simplified):
 ```json
 {
-  "file_ids": [
-    "1234567890_invoice.jpg"
-  ]
+  "document_id": "uuid-of-document"
 }
 ```
 
-**Success Response:**
+Request (Option 2 - Legacy):
+```json
+{
+  "file_id": "1234567890_invoice.pdf",
+  "document_id": "uuid-of-document"
+}
+```
+
+Response:
 ```json
 {
   "success": true,
   "data": {
-    "job_id": "job_456def",
-    "status": "processing",
-    "estimated_completion": "2024-01-07T10:05:00Z"
+    "job_id": "job_456",
+    "status": "pending",
+    "created_at": "2024-01-07T10:00:00Z",
+    "updated_at": "2024-01-07T10:00:00Z"
   }
 }
 ```
 
-### 4. Check Job Status
+### Job Status
 
-Check the status of a processing job.
+**GET** `/api/v1/parse/statements/{job_id}` or `/api/v1/parse/invoices/{job_id}`
+- Checks processing status
+- Returns results when complete
 
-**Endpoint:** `GET /parse/statements/{job_id}` or `/parse/invoices/{job_id}`
-
-**Success Response (Processing):**
-```json
-{
-  "success": true,
-  "data": {
-    "job_id": "job_123abc",
-    "status": "processing",
-    "progress": 45,
-    "estimated_completion": "2024-01-07T10:05:00Z"
-  }
-}
+Example:
+```bash
+curl -X GET "https://api.invaro.ai/api/v1/parse/statements/job_1234567890" \
+  -H "Authorization: Bearer your_api_key"
 ```
 
-**Success Response (Completed):**
+Response:
 ```json
 {
   "success": true,
   "data": {
-    "job_id": "job_123abc",
+    "job_id": "job_1234567890",
     "status": "completed",
-    "results": {
-      "account_number": "1234567890",
-      "bank_name": "Example Bank",
-      "transactions": [
-        {
-          "date": "2024-01-01",
-          "description": "Payment",
-          "amount": 100.50,
-          "type": "credit"
-        }
-      ],
-      "confidence_score": 0.95
+    "file_id": "1234567890_statement.pdf",
+    "created_at": "2024-01-07T10:00:00Z",
+    "updated_at": "2024-01-07T10:05:00Z",
+    "result": {
+      // Parsed document data
     }
   }
 }
 ```
 
-### 5. List Jobs
+### Batch Processing
 
-List all processing jobs with pagination.
+**POST** `/api/v1/parse/statements/batch` or `/api/v1/parse/invoices/batch`
+- Process multiple documents at once
+- Maximum 10 documents per batch
 
-**Endpoint:** `GET /parse/statements` or `/parse/invoices`
+Request:
+```json
+{
+  "files": [
+    {
+      "document_id": "uuid-of-document-1"
+    },
+    {
+      "document_id": "uuid-of-document-2"
+    }
+  ]
+}
+```
 
-**Query Parameters:**
+Response:
+```json
+{
+  "success": true,
+  "data": {
+    "batch_id": "batch_123",
+    "status": "pending",
+    "job_ids": ["job_1", "job_2"],
+    "created_at": "2024-01-07T10:00:00Z",
+    "updated_at": "2024-01-07T10:00:00Z"
+  }
+}
+```
+
+### List Jobs
+
+**GET** `/api/v1/parse/statements` or `/api/v1/parse/invoices`
+- Lists processing jobs
+- Supports pagination and filtering
+
+Parameters:
 - `page`: Page number (default: 1)
 - `page_size`: Items per page (default: 20, max: 100)
 - `status`: Filter by status (pending/processing/completed/failed)
 
-**Example Request:**
-```bash
-curl "https://your-api-domain.com/api/v1/parse/statements?page=1&page_size=20&status=completed" \
-  -H "Authorization: Bearer your_api_key"
-```
-
-**Success Response:**
+Response:
 ```json
 {
   "success": true,
   "data": {
     "jobs": [
       {
-        "job_id": "job_123abc",
+        "job_id": "job_123",
         "status": "completed",
-        "created_at": "2024-01-07T10:00:00Z",
-        "completed_at": "2024-01-07T10:05:00Z",
-        "file_count": 1
+        "created_at": "2024-01-07T10:00:00Z"
       }
     ],
-    "pagination": {
-      "total": 50,
-      "page": 1,
-      "page_size": 20,
-      "total_pages": 3
+    "total": 50,
+    "page": 1,
+    "page_size": 20
+  }
+}
+```
+
+## 🔒 Error Handling
+
+All errors follow a standard format:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human readable message",
+    "details": "Additional error details"
+  }
+}
+```
+
+Common error codes:
+- `UNAUTHORIZED`: Authentication issues
+- `INVALID_REQUEST`: Malformed requests
+- `RATE_LIMIT_EXCEEDED`: Rate limiting
+- `VALIDATION_ERROR`: Request validation failures
+- `INTERNAL_SERVER_ERROR`: Server errors
+
+## 🔄 Rate Limiting
+
+- Default: 60 requests per minute per API key
+- Batch operations count as multiple requests
+- Headers indicate remaining quota:
+  - `X-RateLimit-Limit`
+  - `X-RateLimit-Remaining`
+  - `X-RateLimit-Reset`
+
+## 📚 Complete API Flow Examples
+
+### 1. Bank Statement Processing Flow
+
+```bash
+# 1. Upload bank statement
+curl -X POST "https://api.invaro.ai/api/v1/parse/upload" \
+  -H "Authorization: Bearer your_api_key" \
+  -F "files=@statement.pdf" \
+  -F "type=statement"
+
+# Response:
+{
+  "success": true,
+  "data": {
+    "files": [
+      {
+        "file_id": "1737201629689465000_statement.pdf",
+        "file_url": "https://storage.googleapis.com/bank-statements/1737201629689465000_statement.pdf",
+        "doc_id": "879ba2d7-5ac7-4eea-aab7-cf4a5be01d1d"
+      }
+    ],
+    "status": "done"
+  }
+}
+
+# 2. Start processing
+curl -X POST "https://api.invaro.ai/api/v1/parse/statements" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_id": "1737201629689465000_statement.pdf",
+    "document_id": "879ba2d7-5ac7-4eea-aab7-cf4a5be01d1d"
+  }'
+
+# Response:
+{
+  "success": true,
+  "data": {
+    "job_id": "job_1737201642026659000",
+    "status": "pending"
+  }
+}
+
+# 3. Check status
+curl -X GET "https://api.invaro.ai/api/v1/parse/statements/job_1737201642026659000" \
+  -H "Authorization: Bearer your_api_key"
+
+# Response:
+{
+  "success": true,
+  "data": {
+    "job_id": "job_1737201642026659000",
+    "status": "completed",
+    "file_id": "1737201629689465000_statement.pdf",
+    "created_at": "2024-01-18T12:34:56Z",
+    "updated_at": "2024-01-18T12:35:26Z",
+    "result": {
+      "account_no": "10103631549",
+      "opening_balance": "1,700.31",
+      "closing_balance": "11,468.10",
+      "total_credit": "11,78,713.00",
+      "total_debit": "11,68,945.21",
+      "statement_period": "2023-11-30 TO 2024-11-29",
+      "transactions": [
+        {
+          "date": "2024-01-01",
+          "description": "SALARY CREDIT",
+          "amount": 5000.00,
+          "type": "credit",
+          "balance": 5000.00
+        }
+      ]
     }
   }
 }
 ```
 
-## Error Codes
+### 2. Invoice Processing Flow
 
-| Code | Description | HTTP Status |
-|------|-------------|-------------|
-| UNAUTHORIZED | Authentication failed | 401 |
-| INVALID_REQUEST | Malformed request | 400 |
-| RATE_LIMIT_EXCEEDED | Too many requests | 429 |
-| VALIDATION_ERROR | Request validation failed | 400 |
-| INTERNAL_SERVER_ERROR | Server error | 500 |
+```bash
+# 1. Upload multiple invoices
+curl -X POST "https://api.invaro.ai/api/v1/parse/upload" \
+  -H "Authorization: Bearer your_api_key" \
+  -F "files=@invoice1.pdf" \
+  -F "files=@invoice2.jpg" \
+  -F "callback_url=https://your-domain.com/webhook"
 
-## Rate Limiting
+# 2. Start batch processing
+curl -X POST "https://api.invaro.ai/api/v1/parse/invoices/batch" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "file_ids": [
+      "1234567890_invoice1.pdf",
+      "1234567890_invoice2.jpg"
+    ],
+    "callback_url": "https://your-domain.com/webhook"
+  }'
 
-Rate limits are enforced per API key:
+# 3. List all jobs
+curl "https://api.invaro.ai/api/v1/parse/invoices?page=1&page_size=10&status=completed" \
+  -H "Authorization: Bearer your_api_key"
+```
 
-- Default limit: 60 requests per minute
-- Batch operations count as multiple requests
-- Rate limit headers:
-  ```
-  X-RateLimit-Limit: 60
-  X-RateLimit-Remaining: 45
-  X-RateLimit-Reset: 1704624000
-  ```
+### 3. Webhook Notifications
 
-## Webhooks
+Your callback URL will receive POST requests with job updates:
 
-You can configure webhooks to receive job completion notifications:
-
-1. Register webhook URL in Keyfolio dashboard
-2. Receive POST requests with job results:
 ```json
 {
   "event": "job.completed",
-  "job_id": "job_123abc",
+  "job_id": "job_123",
+  "job_type": "statement_parsing",
   "status": "completed",
+  "created_at": "2024-01-07T10:00:00Z",
+  "completed_at": "2024-01-07T10:05:00Z",
   "results": {
-    // Job results
+    // Parsed document data
   }
 }
 ```
 
-## Best Practices
+## 📡 Available Endpoints
 
-1. **Handling Rate Limits:**
-   - Implement exponential backoff
-   - Cache responses when possible
-   - Use batch endpoints for multiple files
+### File Management
+- `POST /api/v1/parse/upload` - Upload files
+- `GET /api/v1/parse/files/{file_id}` - Get file info
+- `DELETE /api/v1/parse/files/{file_id}` - Delete file
 
-2. **Error Handling:**
-   - Always check the `success` field
-   - Handle rate limits gracefully
-   - Implement retry logic for 5xx errors
+### Bank Statement Processing
+- `POST /api/v1/parse/statements` - Process single statement
+- `POST /api/v1/parse/statements/batch` - Process multiple statements
+- `GET /api/v1/parse/statements/{job_id}` - Get job status
+- `GET /api/v1/parse/statements` - List all jobs
 
-3. **File Uploads:**
-   - Compress images before upload
-   - Use batch uploads for multiple files
-   - Verify file checksums
+### Invoice Processing
+- `POST /api/v1/parse/invoices` - Process single invoice
+- `POST /api/v1/parse/invoices/batch` - Process multiple invoices
+- `GET /api/v1/parse/invoices/{job_id}` - Get job status
+- `GET /api/v1/parse/invoices` - List all jobs
 
-4. **Job Status:**
-   - Poll status with increasing intervals
-   - Use webhooks for real-time updates
-   - Handle timeout scenarios 
+### Job Management
+- `GET /api/v1/jobs` - List all jobs (statements and invoices)
+- `DELETE /api/v1/jobs/{job_id}` - Cancel job
+- `POST /api/v1/jobs/{job_id}/retry` - Retry failed job
+
+## 🎯 Common Use Cases
+
+### 1. Process Bank Statements in Bulk
+
+```bash
+# Upload multiple statements
+for file in *.pdf; do
+  curl -X POST "https://api.invaro.ai/api/v1/parse/upload" \
+    -H "Authorization: Bearer your_api_key" \
+    -F "files=@$file"
+done
+
+# Start batch processing (using document_ids from upload response)
+curl -X POST "https://api.invaro.ai/api/v1/parse/statements/batch" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "files": [
+      {"document_id": "doc-id-1"},
+      {"document_id": "doc-id-2"}
+    ],
+    "callback_url": "https://your-domain.com/webhook",
+    "options": {
+      "extract_transactions": true,
+      "categorize": true,
+      "detect_anomalies": true
+    }
+  }'
+```
+
+### 2. Real-time Invoice Processing
+
+```bash
+# Upload and process immediately
+curl -X POST "https://api.invaro.ai/api/v1/parse/invoices" \
+  -H "Authorization: Bearer your_api_key" \
+  -F "files=@invoice.pdf" \
+  -F "process=true" \
+  -F "callback_url=https://your-domain.com/webhook" \
+  -F "options={\"extract_items\":true,\"detect_tax\":true}"
+
+# Process using document_id
+curl -X POST "https://api.invaro.ai/api/v1/parse/invoices" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "document_id": "uuid-from-upload",
+    "callback_url": "https://your-domain.com/webhook"
+  }'
+```
+
+### 3. Retry Failed Jobs
+
+```bash
+# List failed jobs
+curl "https://api.invaro.ai/api/v1/jobs?status=failed" \
+  -H "Authorization: Bearer your_api_key"
+
+# Retry specific job
+curl -X POST "https://api.invaro.ai/api/v1/jobs/job_123/retry" \
+  -H "Authorization: Bearer your_api_key"
+```
+
+## 🔄 Callback URL Feature
+
+The API supports webhook notifications for asynchronous job updates:
+
+1. **Registration**: Add callback_url when starting a job:
+   ```bash
+   curl -X POST "https://api.invaro.ai/api/v1/parse/statements" \
+     -H "Authorization: Bearer your_api_key" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "file_ids": ["file.pdf"],
+       "callback_url": "https://your-domain.com/webhook"
+     }'
+   ```
+
+2. **Events**: Your webhook will receive these events:
+   - `job.created` - Job created
+   - `job.started` - Processing started
+   - `job.progress` - Processing progress update
+   - `job.completed` - Processing completed
+   - `job.failed` - Processing failed
+
+3. **Security**: Webhooks include signature header:
+   ```bash
+   X-Signature: sha256=HMAC_SHA256(secret_key, body)
+   ```
+
+4. **Retry Policy**: Failed webhook deliveries are retried:
+   - Initial retry after 5 seconds
+   - Exponential backoff (max 1 hour)
+   - Maximum 5 retry attempts
+
+[Rest of the README remains the same] 
