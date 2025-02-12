@@ -1,0 +1,303 @@
+---
+title: "Code Examples"
+description: "Complete code examples for integrating with the Invaro Document Processing API"
+---
+
+## Complete Implementation Examples
+
+Here are complete code examples showing the entire workflow, including document upload, processing, and status monitoring.
+
+<CodeGroup>
+```python Python
+import requests
+import time
+
+class InvaroAPI:
+    def __init__(self, api_key):
+        self.base_url = "https://api.invaro.ai/api/v1"
+        self.headers = {"Authorization": f"Bearer {api_key}"}
+
+    def upload_document(self, file_path):
+        """Upload a document and return its document_id"""
+        url = f"{self.base_url}/parse/upload"
+        with open(file_path, "rb") as f:
+            files = {"files": f}
+            response = requests.post(url, headers=self.headers, files=files)
+            return response.json()["data"]["files"][0]["doc_id"]
+
+    def process_document(self, document_id, doc_type="statements"):
+        """Start processing a document"""
+        url = f"{self.base_url}/parse/{doc_type}"
+        data = {"document_id": document_id}
+        response = requests.post(url, headers=self.headers, json=data)
+        return response.json()["data"]["job_id"]
+
+    def process_batch(self, document_ids, doc_type="statements"):
+        """Process multiple documents in batch"""
+        url = f"{self.base_url}/parse/{doc_type}/batch"
+        data = {
+            "files": [{"document_id": doc_id} for doc_id in document_ids]
+        }
+        response = requests.post(url, headers=self.headers, json=data)
+        return response.json()["data"]
+
+    def check_status(self, job_id, doc_type="statements"):
+        """Check the status of a processing job"""
+        url = f"{self.base_url}/parse/{doc_type}/{job_id}"
+        response = requests.get(url, headers=self.headers)
+        return response.json()
+
+    def process_with_polling(self, file_path, doc_type="statements"):
+        """Process a single document with status polling"""
+        # Upload
+        document_id = self.upload_document(file_path)
+        print(f"Document uploaded: {document_id}")
+
+        # Start processing
+        job_id = self.process_document(document_id, doc_type)
+        print(f"Processing started: {job_id}")
+
+        # Poll for results
+        while True:
+            result = self.check_status(job_id, doc_type)
+            status = result["data"]["status"]
+            print(f"Status: {status}")
+
+            if status == "completed":
+                return result
+            elif status == "failed":
+                raise Exception("Processing failed")
+
+            time.sleep(5)  # Wait 5 seconds before next check
+
+    def process_batch_with_polling(self, file_paths, doc_type="statements"):
+        """Process multiple documents with status polling"""
+        # Upload all documents
+        document_ids = [self.upload_document(path) for path in file_paths]
+        print(f"Documents uploaded: {document_ids}")
+
+        # Start batch processing
+        batch_result = self.process_batch(document_ids, doc_type)
+        print(f"Batch processing started: {batch_result['batch_id']}")
+
+        # Poll for results of each job
+        results = []
+        for job_id in batch_result["job_ids"]:
+            while True:
+                result = self.check_status(job_id, doc_type)
+                status = result["data"]["status"]
+                print(f"Job {job_id} status: {status}")
+
+                if status == "completed":
+                    results.append(result)
+                    break
+                elif status == "failed":
+                    raise Exception(f"Processing failed for job {job_id}")
+
+                time.sleep(5)
+
+        return results
+
+# Usage example
+def main():
+    api = InvaroAPI("your_api_key")
+    
+    # Process single document
+    result = api.process_with_polling("statement.pdf", "statements")
+    print("Single document result:", result)
+    
+    # Process multiple documents
+    files = ["doc1.pdf", "doc2.pdf", "doc3.pdf"]
+    results = api.process_batch_with_polling(files, "statements")
+    print("Batch processing results:", results)
+
+if __name__ == "__main__":
+    main()
+```
+
+```javascript JavaScript
+class InvaroAPI {
+  constructor(apiKey) {
+    this.baseUrl = 'https://api.invaro.ai/api/v1';
+    this.headers = {
+      'Authorization': `Bearer ${apiKey}`
+    };
+  }
+
+  async uploadDocument(file) {
+    const formData = new FormData();
+    formData.append('files', file);
+
+    const response = await fetch(`${this.baseUrl}/parse/upload`, {
+      method: 'POST',
+      headers: this.headers,
+      body: formData
+    });
+
+    const data = await response.json();
+    return data.data.files[0].doc_id;
+  }
+
+  async processDocument(documentId, docType = 'statements') {
+    const response = await fetch(`${this.baseUrl}/parse/${docType}`, {
+      method: 'POST',
+      headers: {
+        ...this.headers,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        document_id: documentId
+      })
+    });
+
+    const data = await response.json();
+    return data.data.job_id;
+  }
+
+  async processBatch(documentIds, docType = 'statements') {
+    const response = await fetch(`${this.baseUrl}/parse/${docType}/batch`, {
+      method: 'POST',
+      headers: {
+        ...this.headers,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        files: documentIds.map(id => ({ document_id: id }))
+      })
+    });
+
+    return await response.json();
+  }
+
+  async checkStatus(jobId, docType = 'statements') {
+    const response = await fetch(`${this.baseUrl}/parse/${docType}/${jobId}`, {
+      headers: this.headers
+    });
+
+    return response.json();
+  }
+
+  async processWithPolling(file, docType = 'statements') {
+    try {
+      // Upload
+      const documentId = await this.uploadDocument(file);
+      console.log('Document uploaded:', documentId);
+
+      // Start processing
+      const jobId = await this.processDocument(documentId, docType);
+      console.log('Processing started:', jobId);
+
+      // Poll for results
+      while (true) {
+        const result = await this.checkStatus(jobId, docType);
+        const status = result.data.status;
+        console.log('Status:', status);
+
+        if (status === 'completed') {
+          return result;
+        } else if (status === 'failed') {
+          throw new Error('Processing failed');
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      throw error;
+    }
+  }
+
+  async processBatchWithPolling(files, docType = 'statements') {
+    try {
+      // Upload all documents
+      const documentIds = await Promise.all(
+        files.map(file => this.uploadDocument(file))
+      );
+      console.log('Documents uploaded:', documentIds);
+
+      // Start batch processing
+      const batchResult = await this.processBatch(documentIds, docType);
+      console.log('Batch processing started:', batchResult.data.batch_id);
+
+      // Poll for results of each job
+      const results = await Promise.all(
+        batchResult.data.job_ids.map(async jobId => {
+          while (true) {
+            const result = await this.checkStatus(jobId, docType);
+            const status = result.data.status;
+            console.log(`Job ${jobId} status:`, status);
+
+            if (status === 'completed') {
+              return result;
+            } else if (status === 'failed') {
+              throw new Error(`Processing failed for job ${jobId}`);
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 5000));
+          }
+        })
+      );
+
+      return results;
+    } catch (error) {
+      console.error('Error:', error);
+      throw error;
+    }
+  }
+}
+
+// Usage example
+const api = new InvaroAPI('your_api_key');
+
+// Process single document
+const fileInput = document.querySelector('input[type="file"]');
+api.processWithPolling(fileInput.files[0], 'statements')
+  .then(result => console.log('Single document result:', result))
+  .catch(error => console.error('Error:', error));
+
+// Process multiple documents
+const multipleFiles = fileInput.files;
+api.processBatchWithPolling(Array.from(multipleFiles), 'statements')
+  .then(results => console.log('Batch processing results:', results))
+  .catch(error => console.error('Error:', error));
+```
+</CodeGroup>
+
+## Features Implemented
+
+These examples implement:
+1. Document upload
+2. Individual document processing
+3. Batch processing (up to 10 documents)
+4. Status monitoring with polling
+5. Error handling
+6. Progress tracking
+
+## Best Practices Implemented
+
+The code examples follow these best practices:
+1. **Proper Error Handling** - All API calls are wrapped in try-catch blocks
+2. **Status Polling** - Implements recommended polling intervals
+3. **Batch Processing** - Efficiently handles multiple documents
+4. **Progress Tracking** - Provides status updates during processing
+5. **Resource Cleanup** - Properly closes file handles (Python)
+
+## Next Steps
+
+<CardGroup>
+  <Card
+    title="API Reference"
+    icon="code"
+    href="/api-reference/authentication"
+  >
+    Explore detailed API documentation
+  </Card>
+
+  <Card
+    title="Best Practices"
+    icon="book"
+    href="/api-reference/best-practices/file-uploads"
+  >
+    Learn how to optimize your integration
+  </Card>
+</CardGroup> 

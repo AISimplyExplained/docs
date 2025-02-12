@@ -1,0 +1,74 @@
+---
+title: "Authentication"
+description: "Set up authentication for the Invaro Document Processing API"
+---
+
+## Getting Your API Key
+
+<Steps>
+  <Step title="Sign up for an Invaro account">
+    Sign up for an [Invaro account](https://dashboard.invaro.ai/signup) if you haven't already
+  </Step>
+  <Step title="Navigate to the API Keys section">
+    Go to the [API Keys section](https://dashboard.invaro.ai/api-keys) in your dashboard
+  </Step>
+  <Step title="Create a new API key">
+    Click on "Create New Key" and give it a descriptive name
+  </Step>
+  <Step title="Store your API key securely">
+    Copy and store your API key securely - you won't be able to see it again
+  </Step>
+</Steps>
+
+## Using Your API Key
+
+Include your API key in all API requests using the Bearer token format in the Authorization header:
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://api.invaro.ai/api/v1/parse/upload" \
+  -H "Authorization: Bearer your_api_key" \
+  -F "files=@document.pdf"
+```
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer your_api_key"
+}
+
+response = requests.post(url, headers=headers)
+```
+
+```javascript JavaScript
+const headers = {
+    'Authorization': 'Bearer your_api_key'
+};
+
+const response = await fetch(url, {
+    headers: headers
+});
+```
+</CodeGroup>
+
+## Security Best Practices
+
+1. **Keep your API key secret** - Never expose it in client-side code or public repositories
+2. **Use environment variables** - Store your API key in environment variables
+3. **Rotate keys periodically** - Regularly rotate your API keys for enhanced security
+4. **Use separate keys** - Use different API keys for development and production
+
+<Warning>
+Never share your API key or commit it to version control. If your key is compromised, rotate it immediately from your dashboard.
+</Warning>
+
+## Next Steps
+
+<Card
+  title="Upload Documents"
+  icon="cloud-arrow-up"
+  href="/quickstart/upload-documents"
+>
+  Learn how to upload documents for processing
+</Card> 

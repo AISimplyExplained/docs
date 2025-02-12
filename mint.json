@@ -47,16 +47,21 @@
     {
       "group": "Getting Started",
       "pages": [
-        {
-          "group": "Introduction",
-          "pages": [
-            "introduction/what-is-document-parsing",
-            "introduction/key-features",
-            "introduction/use-cases",
-            "introduction/supported-formats"
-          ]
-        },
-        "quickstart"
+        "introduction/what-is-document-parsing",
+        "introduction/key-features",
+        "introduction/use-cases",
+        "introduction/supported-formats"
+      ]
+    },
+    {
+      "group": "Quickstart",
+      "pages": [
+        "quickstart/overview",
+        "quickstart/authentication",
+        "quickstart/upload-documents",
+        "quickstart/process-documents",
+        "quickstart/check-status",
+        "quickstart/code-examples"
       ]
     },
     {
@@ -80,6 +85,7 @@
           "group": "Bank Statements",
           "pages": [
             "api-reference/endpoints/process-statements",
+            "api-reference/endpoints/process-statements-batch",
             "api-reference/endpoints/get-statement-status"
           ]
         },
@@ -87,6 +93,7 @@
           "group": "Invoices",
           "pages": [
             "api-reference/endpoints/process-invoices",
+            "api-reference/endpoints/process-invoices-batch",
             "api-reference/endpoints/get-invoice-status"
           ]
         }

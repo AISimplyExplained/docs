@@ -503,6 +503,206 @@
                     }
                 }
             }
+        },
+        "/parse/statements/batch": {
+            "post": {
+                "summary": "Process Multiple Bank Statements",
+                "description": "Process multiple bank statements in a single batch (maximum 10 documents)",
+                "operationId": "processStatementsBatch",
+                "tags": [
+                    "Statement Processing"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "files"
+                                ],
+                                "properties": {
+                                    "files": {
+                                        "type": "array",
+                                        "maxItems": 10,
+                                        "items": {
+                                            "type": "object",
+                                            "required": [
+                                                "document_id"
+                                            ],
+                                            "properties": {
+                                                "document_id": {
+                                                    "type": "string",
+                                                    "description": "UUID of the document to process"
+                                                }
+                                            }
+                                        },
+                                        "example": [
+                                            {
+                                                "document_id": "uuid-of-document-1"
+                                            },
+                                            {
+                                                "document_id": "uuid-of-document-2"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Batch processing started successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "batch_id": {
+                                                    "type": "string",
+                                                    "example": "batch_123"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "pending"
+                                                },
+                                                "job_ids": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "example": [
+                                                        "job_1",
+                                                        "job_2"
+                                                    ]
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2024-01-07T10:00:00Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2024-01-07T10:00:00Z"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/parse/invoices/batch": {
+            "post": {
+                "summary": "Process Multiple Invoices",
+                "description": "Process multiple invoices in a single batch (maximum 10 documents)",
+                "operationId": "processInvoicesBatch",
+                "tags": [
+                    "Invoice Processing"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "files"
+                                ],
+                                "properties": {
+                                    "files": {
+                                        "type": "array",
+                                        "maxItems": 10,
+                                        "items": {
+                                            "type": "object",
+                                            "required": [
+                                                "document_id"
+                                            ],
+                                            "properties": {
+                                                "document_id": {
+                                                    "type": "string",
+                                                    "description": "UUID of the document to process"
+                                                }
+                                            }
+                                        },
+                                        "example": [
+                                            {
+                                                "document_id": "uuid-of-document-1"
+                                            },
+                                            {
+                                                "document_id": "uuid-of-document-2"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Batch processing started successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "batch_id": {
+                                                    "type": "string",
+                                                    "example": "batch_123"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "pending"
+                                                },
+                                                "job_ids": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "example": [
+                                                        "job_1",
+                                                        "job_2"
+                                                    ]
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2024-01-07T10:00:00Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2024-01-07T10:00:00Z"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {

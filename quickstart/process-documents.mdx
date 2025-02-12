@@ -1,0 +1,152 @@
+---
+title: "Process Documents"
+description: "Learn how to process your uploaded documents individually or in batch"
+---
+
+## Processing Options
+
+Invaro offers two ways to process documents:
+1. **Individual Processing** - Process one document at a time
+2. **Batch Processing** - Process up to 10 documents simultaneously
+
+## Individual Processing
+
+<Tabs>
+  <Tab title="Invoices">
+    ```bash cURL
+    curl -X POST "https://api.invaro.ai/api/v1/parse/invoices" \
+      -H "Authorization: Bearer your_api_key" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "document_id": "your_document_id"
+      }'
+    ```
+
+    ```javascript JavaScript
+    const response = await fetch('https://api.invaro.ai/api/v1/parse/invoices', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer your_api_key',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        document_id: document_id
+      })
+    });
+
+    const data = await response.json();
+    const job_id = data.data.job_id;
+    ```
+  </Tab>
+  <Tab title="Bank Statements">
+    ```bash cURL
+    curl -X POST "https://api.invaro.ai/api/v1/parse/statements" \
+      -H "Authorization: Bearer your_api_key" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "document_id": "your_document_id"
+      }'
+    ```
+
+    ```javascript JavaScript
+    const response = await fetch('https://api.invaro.ai/api/v1/parse/statements', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer your_api_key',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        document_id: document_id
+      })
+    });
+
+    const data = await response.json();
+    const job_id = data.data.job_id;
+    ```
+  </Tab>
+</Tabs>
+
+## Batch Processing
+
+Process multiple documents at once (maximum 10 documents per batch):
+
+<Tabs>
+  <Tab title="Invoices">
+    ```bash cURL
+    curl -X POST "https://api.invaro.ai/api/v1/parse/invoices/batch" \
+      -H "Authorization: Bearer your_api_key" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "files": [
+          {"document_id": "uuid-of-document-1"},
+          {"document_id": "uuid-of-document-2"}
+        ]
+      }'
+    ```
+
+    ```javascript JavaScript
+    const response = await fetch('https://api.invaro.ai/api/v1/parse/invoices/batch', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer your_api_key',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        files: [
+          {document_id: "uuid-of-document-1"},
+          {document_id: "uuid-of-document-2"}
+        ]
+      })
+    });
+
+    const data = await response.json();
+    const { batch_id, job_ids } = data.data;
+    ```
+  </Tab>
+  <Tab title="Bank Statements">
+    ```bash cURL
+    curl -X POST "https://api.invaro.ai/api/v1/parse/statements/batch" \
+      -H "Authorization: Bearer your_api_key" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "files": [
+          {"document_id": "uuid-of-document-1"},
+          {"document_id": "uuid-of-document-2"}
+        ]
+      }'
+    ```
+
+    ```javascript JavaScript
+    const response = await fetch('https://api.invaro.ai/api/v1/parse/statements/batch', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer your_api_key',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        files: [
+          {document_id: "uuid-of-document-1"},
+          {document_id: "uuid-of-document-2"}
+        ]
+      })
+    });
+
+    const data = await response.json();
+    const { batch_id, job_ids } = data.data;
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+For batch processing, you'll receive both a `batch_id` and an array of `job_ids`. You can use either to check the processing status.
+</Note>
+
+## Next Steps
+
+<Card
+  title="Check Status"
+  icon="magnifying-glass"
+  href="/quickstart/check-status"
+>
+  Learn how to check the processing status of your documents
+</Card> 

@@ -1,0 +1,167 @@
+---
+title: 'Process Multiple Statements'
+openapi: 'POST /parse/statements/batch'
+description: 'Process multiple bank statements in a single API call. This endpoint allows you to submit up to 10 documents for processing at once.'
+---
+
+
+{/* ## API Endpoint
+
+```bash
+POST https://api.invaro.ai/api/v1/parse/statements/batch
+```
+
+## Request
+
+### Headers
+
+<ParamField header="Authorization" required>
+  Your API key with Bearer prefix: `Bearer your_api_key`
+</ParamField>
+
+<ParamField header="Content-Type" required>
+  Must be `application/json`
+</ParamField>
+
+### Body Parameters
+
+<ParamField body="files" type="array" required>
+  Array of document objects to process (maximum 10 documents)
+  <Expandable title="Document Object">
+    <ParamField body="document_id" type="string" required>
+      The document ID received from the upload endpoint
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+### Example Request
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://api.invaro.ai/api/v1/parse/statements/batch" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "files": [
+      {"document_id": "uuid-of-document-1"},
+      {"document_id": "uuid-of-document-2"}
+    ]
+  }'
+```
+
+```python Python
+import requests
+
+url = "https://api.invaro.ai/api/v1/parse/statements/batch"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+data = {
+    "files": [
+        {"document_id": "uuid-of-document-1"},
+        {"document_id": "uuid-of-document-2"}
+    ]
+}
+
+response = requests.post(url, headers=headers, json=data)
+result = response.json()
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.invaro.ai/api/v1/parse/statements/batch', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer your_api_key',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    files: [
+      {document_id: "uuid-of-document-1"},
+      {document_id: "uuid-of-document-2"}
+    ]
+  })
+});
+
+const result = await response.json();
+```
+</CodeGroup>
+
+## Response
+
+<ResponseField name="success" type="boolean">
+  Indicates if the request was successful
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="Properties">
+    <ResponseField name="batch_id" type="string">
+      Unique identifier for the batch processing job
+    </ResponseField>
+
+    <ResponseField name="status" type="string">
+      Current status of the batch job (pending, processing, completed, failed)
+    </ResponseField>
+
+    <ResponseField name="job_ids" type="array">
+      Array of individual job IDs for each document in the batch
+    </ResponseField>
+
+    <ResponseField name="created_at" type="string">
+      Timestamp when the batch job was created
+    </ResponseField>
+
+    <ResponseField name="updated_at" type="string">
+      Timestamp when the batch job was last updated
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Example Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "batch_id": "batch_123",
+    "status": "pending",
+    "job_ids": ["job_1", "job_2"],
+    "created_at": "2024-01-07T10:00:00Z",
+    "updated_at": "2024-01-07T10:00:00Z"
+  }
+}
+```
+
+## Error Responses
+
+<ResponseField name="400" type="object">
+  Bad Request - Invalid parameters or too many documents
+  ```json
+  {
+    "success": false,
+    "error": {
+      "code": "VALIDATION_ERROR",
+      "message": "Maximum 10 documents allowed per batch"
+    }
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="401" type="object">
+  Unauthorized - Invalid API key
+  ```json
+  {
+    "success": false,
+    "error": {
+      "code": "UNAUTHORIZED",
+      "message": "Invalid API key provided"
+    }
+  }
+  ```
+</ResponseField>
+
+## Notes
+
+- Maximum 10 documents can be processed in a single batch
+- Use the individual job IDs with the [Get Statement Status](/api-reference/endpoints/get-statement-status) endpoint to check processing status
+- Rate limits apply to the total number of documents in the batch */}

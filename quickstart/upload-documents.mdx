@@ -1,0 +1,94 @@
+---
+title: "Upload Documents"
+description: "Learn how to upload documents for processing"
+---
+
+## Document Upload
+
+Before processing documents, you need to upload them to our secure servers. The upload endpoint accepts PDF, JPG, JPEG, and PNG files.
+
+### Upload Endpoint
+
+```bash
+POST https://api.invaro.ai/api/v1/parse/upload
+```
+
+### Example Implementation
+
+<CodeGroup>
+```bash cURL
+curl -X POST "https://api.invaro.ai/api/v1/parse/upload" \
+  -H "Authorization: Bearer your_api_key" \
+  -F "files=@document.pdf"
+```
+
+```python Python
+import requests
+
+url = "https://api.invaro.ai/api/v1/parse/upload"
+headers = {
+    "Authorization": "Bearer your_api_key"
+}
+files = {
+    "files": open("document.pdf", "rb")
+}
+
+response = requests.post(url, headers=headers, files=files)
+document_id = response.json()["data"]["files"][0]["doc_id"]
+```
+
+```javascript JavaScript
+const formData = new FormData();
+formData.append('files', document); // document is a File object
+
+const response = await fetch('https://api.invaro.ai/api/v1/parse/upload', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer your_api_key'
+  },
+  body: formData
+});
+
+const data = await response.json();
+const document_id = data.data.files[0].doc_id;
+```
+</CodeGroup>
+
+### Response Format
+
+```json
+{
+  "success": true,
+  "data": {
+    "files": [
+      {
+        "file_id": "1739260380783576729_invoice3.pdf",
+        "file_url": "https://storage.invaro.ai/documents/1739260380783576729_invoice3.pdf",
+        "doc_id": "f663d9ac-6d5b-4cfe-bf30-ac19ad9429e4"
+      }
+    ],
+    "status": "done"
+  }
+}
+```
+
+## Best Practices
+
+1. **File Size** - Keep files under 10MB for optimal processing
+2. **Image Quality** - Ensure documents are clear and readable
+3. **File Format** - Use PDF for best results
+4. **Error Handling** - Always implement proper error handling
+
+<Note>
+Store the `doc_id` from the response - you'll need it to process the document.
+</Note>
+
+## Next Steps
+
+<Card
+  title="Process Documents"
+  icon="gears"
+  href="/quickstart/process-documents"
+>
+  Learn how to process your uploaded documents
+</Card> 
